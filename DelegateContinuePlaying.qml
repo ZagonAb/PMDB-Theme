@@ -24,9 +24,12 @@ Component {
                 // Verificar específicamente Duration y playTime
                 var durationValue = game.extra ? game.extra["duration"] || game.extra["duration"] : null;
                 console.log("Duration value:", durationValue);
-                console.log("playTime value:", game.playTime);
 
-                // Calculate progress percentage based on playTime and Duration
+                // Obtener el tiempo de reproducción desde el archivo JSON
+                var watchedTime = Utils.getLastPosition(game.title) / 1000; // Convertir a segundos
+                console.log("Tiempo reproducido en segundos:", watchedTime);
+
+                // Calculate progress percentage based on watchedTime and Duration
                 var totalDuration = 0;
                 if (durationValue) {
                     totalDuration = parseInt(durationValue) * 60; // Convert minutes to seconds
@@ -34,9 +37,6 @@ Component {
                 } else {
                     console.log("¡ADVERTENCIA! No se encontró Duration en los datos extra");
                 }
-
-                var watchedTime = game.playTime || 0;
-                console.log("Tiempo reproducido en segundos:", watchedTime);
 
                 // Ensure we don't exceed 100% progress
                 progressPercentage = totalDuration > 0 ? Math.min(watchedTime / totalDuration, 1.0) : 0;

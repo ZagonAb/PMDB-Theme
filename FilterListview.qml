@@ -11,6 +11,7 @@ Item {
     property alias baseMoviesFilter: baseMoviesFilter
     property alias recentlyAddedMoviesFilter: recentlyAddedMoviesFilter
     property alias recentlyAddedMoviesModel: recentlyAddedMoviesModel
+    property alias recentlyAddedMoviesModelLimited: recentlyAddedMoviesModelLimited
 
     SortFilterProxyModel {
         id: baseMoviesFilter
@@ -77,7 +78,7 @@ Item {
                     }
                 }
 
-                return isMovieCollection && modelData.playCount === 0;
+                return isMovieCollection && playCount === 0;
             }
         }
     }
@@ -91,22 +92,20 @@ Item {
     SortFilterProxyModel {
         id: recentlyAddedMoviesFilter
         sourceModel: baseMoviesFilter
-
         filters: ExpressionFilter {
             expression: {
-                var addedDate = modelData && modelData.extra ? modelData.extra["added-date"] : null;
-                return addedDate !== null && addedDate !== undefined && addedDate !== "";
+                // Verifica que el timestamp esté definido y sea un número válido
+                if (extra && extra["added-timestamp"]) {
+                    var timestamp = extra["added-timestamp"];
+                    return !isNaN(timestamp) && timestamp !== null && timestamp !== undefined;
+                }
+                return false; // Si no hay timestamp, excluir la película
             }
         }
 
-        sorters: ExpressionSorter {
-            expression: {
-                var addedDate = modelData && modelData.extra ? modelData.extra["added-date"] : null;
-                if (!addedDate) return 0;
-                var date = new Date(addedDate);
-                return isNaN(date.getTime()) ? 0 : date.getTime();
-            }
-            ascendingOrder: false
+        sorters: RoleSorter {
+            roleName: "added-timestamp" // Usa el timestamp para ordenar
+            sortOrder: Qt.DescendingOrder // Ordenar de más reciente a más antiguo
         }
     }
 
@@ -117,18 +116,16 @@ Item {
             // Crear una lista temporal para ordenar
             var tempList = [];
 
-            // Recopilar todas las películas con fecha de adición
+            // Recopilar todas las películas con timestamp de adición
             for (var i = 0; i < baseMoviesFilter.count; i++) {
                 var movie = baseMoviesFilter.get(i);
 
-                if (movie && movie.extra && movie.extra["added-date"]) {
-                    var addedDate = movie.extra["added-date"];
-                    var date = new Date(addedDate);
-
-                    if (!isNaN(date.getTime())) {
+                if (movie && movie.extra && movie.extra["added-timestamp"]) {
+                    var timestamp = parseInt(movie.extra["added-timestamp"]); // Asegurarse de que sea un número
+                    if (!isNaN(timestamp)) {
                         tempList.push({
                             movieData: movie,
-                            timestamp: date.getTime()
+                            timestamp: timestamp
                         });
                     }
                 }
@@ -144,9 +141,50 @@ Item {
                 recentlyAddedMoviesModel.append(tempList[j].movieData);
             }
 
-            console.log("recentlyAddedMoviesModel populated with " + recentlyAddedMoviesModel.count + " movies");
+            //console.log("recentlyAddedMoviesModel populated with " + recentlyAddedMoviesModel.count + " movies");
         }
     }
+
+    ListModel {
+        id: recentlyAddedMoviesModelLimited
+
+        Component.onCompleted: {
+            // Crear una lista temporal para ordenar
+            var tempList = [];
+
+            // Recopilar todas las películas con timestamp de adición
+            for (var i = 0; i < baseMoviesFilter.count; i++) {
+                var movie = baseMoviesFilter.get(i);
+
+                if (movie && movie.extra && movie.extra["added-timestamp"]) {
+                    var timestamp = parseInt(movie.extra["added-timestamp"]); // Asegurarse de que sea un número
+                    if (!isNaN(timestamp)) {
+                        tempList.push({
+                            movieData: movie,
+                            timestamp: timestamp // Usar el timestamp directamente
+                        });
+                    }
+                }
+            }
+
+            // Ordenar la lista por timestamp (más reciente primero)
+            tempList.sort(function(a, b) {
+                return b.timestamp - a.timestamp;
+            });
+
+            // Limitar la lista a 15 elementos
+            var maxMovies = 15;
+            var limitedList = tempList.slice(0, maxMovies);
+
+            // Agregar las películas ordenadas y limitadas al ListModel
+            for (var j = 0; j < limitedList.length; j++) {
+                recentlyAddedMoviesModelLimited.append(limitedList[j].movieData);
+            }
+
+            //console.log("recentlyAddedMoviesModelLimited populated with " + recentlyAddedMoviesModelLimited.count + " movies");
+        }
+    }
+
 
     ListModel {
         id: unplayedMoviesModel

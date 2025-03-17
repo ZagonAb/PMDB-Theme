@@ -1,5 +1,6 @@
 // GridViewTitles.qml
 import QtQuick 2.15
+import "utils.js" as Utils
 
 FocusScope {
     id: gridViewTitlesRoot
@@ -19,6 +20,14 @@ FocusScope {
     function hideGrid() {
         isVisible = false;
         hasFocus = false;
+
+        // Limpia la imagen de fondo explícitamente
+        backgroundImage.source = "";
+        currentMovie = null;
+
+        // Asegúrate de que el overlay tenga la opacidad correcta
+        overlayImage.opacity = 0.7;
+
         currentFocus = "menu";
         leftMenu.menuList.focus = true;
         listviewContainer.visible = true;
@@ -69,6 +78,12 @@ FocusScope {
             if (api.keys.isCancel(event)) {
                 event.accepted = true;
                 hideGrid();  // Ocultar el gridview al presionar "Cancelar"
+            } else if (api.keys.isAccept(event)) {
+                event.accepted = true;
+                if (currentIndex >= 0) {
+                    Utils.showDetails(movieDetails, currentModel.get(currentIndex), "gridViewTitles"); // Pasar "gridViewTitles" como previousFocus
+                    gridViewTitlesRoot.visible = false; // Ocultar el grid al mostrar los detalles
+                }
             }
         }
     }

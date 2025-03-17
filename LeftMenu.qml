@@ -83,15 +83,6 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    currentFocus = "menu"
-                    menuList.currentIndex = index
-                    handleMenuSelection(model.name)
-                }
-            }
         }
 
         // Manejar la tecla de "Enter" o "Aceptar" para abrir el GridView
@@ -103,13 +94,15 @@ Rectangle {
             }
         }
 
+        // Update in LeftMenu.qml
         Keys.onRightPressed: {
-            currentFocus = "random"
+            currentFocus = "recently"
         }
 
         Keys.onUpPressed: decrementCurrentIndex()
         Keys.onDownPressed: incrementCurrentIndex()
     }
+
 
     function handleMenuSelection(option) {
         switch (option) {
@@ -136,6 +129,8 @@ Rectangle {
             default:
                 gridViewMovies.isVisible = false;
                 gridViewTitles.isVisible = false;
+                currentFocus = "menu";
+                currentMovie = Utils.resetBackground(backgroundImage, overlayImage);
                 break;
         }
     }

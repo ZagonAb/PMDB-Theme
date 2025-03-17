@@ -15,12 +15,15 @@ Item {
     property var unplayedMoviesModel
     property var continuePlayingMovies
     property var favoriteMovies
+    property var recentlyAddedMoviesModelLimited
 
     // Expón las listas como propiedades públicas
     property alias randomMoviesList: randomMoviesList
     property alias unplayedMoviesList: unplayedMoviesList
     property alias continuePlayingList: continuePlayingList
     property alias favoriteList: favoriteList
+    property alias recentlyMoviesList: recentlyMoviesList
+
 
     // Expón el Flickable como propiedad pública
     property alias contentFlickable: contentFlickable
@@ -30,6 +33,7 @@ Item {
     property alias unplayedMoviesSection: unplayedMoviesSection
     property alias continuePlayingSection: continuePlayingSection
     property alias favoriteSection: favoriteSection
+    property alias recentlyAddedSection: recentlyAddedSection
 
     // Propiedad para controlar si la interfaz ya ha sido interactuada
     property bool hasUserInteracted: false
@@ -49,6 +53,54 @@ Item {
             id: mainColumn
             width: parent.width
             spacing: 10
+
+            Item {
+                id: recentlyAddedSection
+                width: parent.width
+                height: 400
+
+                Text {
+                    id: recentlyMoviesTitle
+                    text: "Recently added"
+                    color: "white"
+                    font { family: global.fonts.sans; pixelSize: 28 }
+                    anchors { left: parent.left; top: parent.top; margins: 20 }
+                }
+
+                ListView {
+                    id: recentlyMoviesList
+                    orientation: Qt.Horizontal
+                    focus: currentFocus === "recently"
+                    anchors {
+                        top: recentlyMoviesTitle.bottom
+                        left: parent.left
+                        right: parent.right
+                        bottom: parent.bottom
+                        margins: 20
+                    }
+                    model: recentlyAddedMoviesModelLimited
+                    delegate: movieDelegate
+                    spacing: 20
+                    cacheBuffer: width * 3
+                    displayMarginBeginning: 200
+                    displayMarginEnd: 200
+                    reuseItems: true
+                    highlightMoveDuration: 200
+                    highlightResizeDuration: 0
+                    maximumFlickVelocity: 2500
+                    boundsBehavior: Flickable.StopAtBounds
+                    flickDeceleration: 1500
+
+                    onCurrentIndexChanged: {
+                        if (currentFocus === "recently" && currentIndex >= 0) {
+                            currentMovie = recentlyAddedMoviesModelLimited.get(currentIndex);
+                            backgroundImage.source = currentMovie ? currentMovie.assets.screenshot || currentMovie.assets.background : "";
+                            game = recentlyAddedMoviesModelLimited.get(currentIndex);
+                        }
+                    }
+                }
+            }
+
 
             Item {
                 id: randomMoviesSection

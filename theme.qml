@@ -12,11 +12,21 @@ FocusScope {
     id: root
     focus: true
 
+    // Detectar cambios de foco
+    onFocusChanged: {
+        if (focus) {
+            // El usuario ha vuelto a la interfaz
+            console.log("Interfaz enfocada, actualizando progreso...");
+            Utils.forceModelUpdate(collectionsItem.continuePlayingMovies);
+            listviewContainer.continuePlayingList.model = collectionsItem.continuePlayingMovies;
+        }
+    }
+
     // Imagen de fondo principal
     Image {
         id: backgroundImage
         anchors.fill: parent
-        source: currentMovie ? (currentMovie.assets.screenshot || currentMovie.assets.background) : ""
+        source:"" //currentMovie ? (currentMovie.assets.screenshot || currentMovie.assets.background) : ""
         fillMode: Image.PreserveAspectCrop
         mipmap: true
         cache: true
@@ -26,11 +36,16 @@ FocusScope {
     Image {
         id: overlayImage
         anchors.fill: parent
-        source: "assets/icons/background.png" // Imagen superpuesta
+        source: "assets/icons/background.png"
         fillMode: Image.PreserveAspectCrop
-        opacity: 0.7 // 30% de opacidad
+        opacity: 0.7
         mipmap: true
         cache: true
+
+        // Añadir esta transición
+        Behavior on opacity {
+            NumberAnimation { duration: 300; easing.type: Easing.OutQuad }
+        }
     }
 
     property string currentFocus: "menu"
@@ -45,6 +60,7 @@ FocusScope {
     FilterListview { id: collectionsItem }
     ListviewHome {
         id: listviewContainer
+        recentlyAddedMoviesModelLimited: collectionsItem.recentlyAddedMoviesModelLimited
         randomMoviesModel: collectionsItem.randomMoviesModel
         unplayedMoviesModel: collectionsItem.unplayedMoviesModel
         continuePlayingMovies: collectionsItem.continuePlayingMovies
@@ -74,18 +90,29 @@ FocusScope {
         isVisible: false
     }
 
+    MovieDetails {
+        id: movieDetails
+        anchors.fill: parent
+    }
+
     Delegate { id: movieDelegate }
 
-    Keys.onPressed: {
+    /*Keys.onPressed: {
         switch (event.key) {
             case Qt.Key_Left:
+                //console.log("Tecla Left presionada")
                 event.accepted = true
                 if (currentFocus === "gridViewTitles") {
                     gridViewTitles.hideGrid();
                 } else if (currentFocus !== "menu") {
-                    currentFocus = "menu"
-                    leftMenu.menuList.focus = true
-                    backgroundImage.source = "" // Limpiar la imagen de fondo
+                    // Limpia la imagen de fondo explícitamente antes de cambiar el foco
+                    backgroundImage.source = "";
+                    currentMovie = null;
+                    // Asegúrate de que el overlay tenga la opacidad correcta
+                    overlayImage.opacity = 0.7;
+                    // Ahora cambia el foco al menú
+                    currentFocus = "menu";
+                    leftMenu.menuList.focus = true;
                 }
                 break
             case Qt.Key_Up:
@@ -151,20 +178,116 @@ FocusScope {
                 }
                 break
         }
+    }*/
+
+    Keys.onPressed: {
+        switch (event.key) {
+            case Qt.Key_Left:
+                //console.log("Tecla Left presionada")
+                event.accepted = true
+                if (currentFocus === "gridViewTitles") {
+                    gridViewTitles.hideGrid();
+                } else if (currentFocus !== "menu") {
+                    // Limpia la imagen de fondo explícitamente antes de cambiar el foco
+                    backgroundImage.source = "";
+                    currentMovie = null;
+                    // Asegúrate de que el overlay tenga la opacidad correcta
+                    overlayImage.opacity = 0.7;
+                    // Ahora cambia el foco al menú
+                    currentFocus = "menu";
+                    leftMenu.menuList.focus = true;
+                }
+                break
+            case Qt.Key_Up:
+                event.accepted = true
+                if (currentFocus === "random") {
+                    currentFocus = "recently"
+                    listviewContainer.contentFlickable.contentY = listviewContainer.recentlyAddedSection.y
+                } else if (currentFocus === "continue") {
+                    if (listviewContainer.unplayedMoviesModel.count > 0) {
+                        currentFocus = "unplayed"
+                        listviewContainer.contentFlickable.contentY = listviewContainer.unplayedMoviesSection.y
+                    } else {
+                        currentFocus = "random"
+                        listviewContainer.contentFlickable.contentY = listviewContainer.randomMoviesSection.y
+                    }
+                } else if (currentFocus === "favorites") {
+                    if (listviewContainer.continuePlayingMovies.count > 0) {
+                        currentFocus = "continue"
+                        listviewContainer.contentFlickable.contentY = listviewContainer.continuePlayingSection.y
+                    } else if (listviewContainer.unplayedMoviesModel.count > 0) {
+                        currentFocus = "unplayed"
+                        listviewContainer.contentFlickable.contentY = listviewContainer.unplayedMoviesSection.y
+                    } else {
+                        currentFocus = "random"
+                        listviewContainer.contentFlickable.contentY = listviewContainer.randomMoviesSection.y
+                    }
+                } else if (currentFocus === "unplayed") {
+                    currentFocus = "random"
+                    listviewContainer.contentFlickable.contentY = listviewContainer.randomMoviesSection.y
+                }
+                break
+            case Qt.Key_Down:
+                event.accepted = true
+                if (currentFocus === "recently") {
+                    currentFocus = "random"
+                    listviewContainer.contentFlickable.contentY = listviewContainer.randomMoviesSection.y
+                } else if (currentFocus === "random") {
+                    if (listviewContainer.unplayedMoviesModel.count > 0) {
+                        currentFocus = "unplayed"
+                        listviewContainer.contentFlickable.contentY = listviewContainer.unplayedMoviesSection.y
+                    } else if (listviewContainer.continuePlayingMovies.count > 0) {
+                        currentFocus = "continue"
+                        listviewContainer.contentFlickable.contentY = listviewContainer.continuePlayingSection.y
+                    } else if (listviewContainer.favoriteMovies.count > 0) {
+                        currentFocus = "favorites"
+                        listviewContainer.contentFlickable.contentY = listviewContainer.favoriteSection.y
+                    }
+                } else if (currentFocus === "unplayed") {
+                    if (listviewContainer.continuePlayingMovies.count > 0) {
+                        currentFocus = "continue"
+                        listviewContainer.contentFlickable.contentY = listviewContainer.continuePlayingSection.y
+                    } else if (listviewContainer.favoriteMovies.count > 0) {
+                        currentFocus = "favorites"
+                        listviewContainer.contentFlickable.contentY = listviewContainer.favoriteSection.y
+                    }
+                } else if (currentFocus === "continue") {
+                    if (listviewContainer.favoriteMovies.count > 0) {
+                        currentFocus = "favorites"
+                        listviewContainer.contentFlickable.contentY = listviewContainer.favoriteSection.y
+                    }
+                } else if (currentFocus === "favorites") {
+                    currentFocus = "recently"
+                    listviewContainer.contentFlickable.contentY = listviewContainer.recentlyAddedSection.y
+                }
+                break
+        }
     }
+
 
     onCurrentFocusChanged: {
         if (currentFocus === "menu") {
             leftMenu.menuList.focus = true;
-            backgroundImage.source = ""; // Limpiar la imagen de fondo
+            backgroundImage.source = "";
+            overlayImage.opacity = 0.7;
+            currentMovie = null;
+        } else if (currentFocus === "recently") {
+            listviewContainer.recentlyMoviesList.focus = true;
+            listviewContainer.contentFlickable.contentY = listviewContainer.recentlyAddedSection.y;
+            if (listviewContainer.recentlyMoviesList.currentIndex >= 0) {
+                currentMovie = listviewContainer.recentlyAddedMoviesModelLimited.get(listviewContainer.recentlyMoviesList.currentIndex);
+                backgroundImage.source = currentMovie ? currentMovie.assets.screenshot || currentMovie.assets.background : "";
+            } else {
+                backgroundImage.source = "";
+            }
         } else if (currentFocus === "random") {
             listviewContainer.randomMoviesList.focus = true;
             listviewContainer.contentFlickable.contentY = listviewContainer.randomMoviesSection.y;
             if (listviewContainer.randomMoviesList.currentIndex >= 0) {
                 currentMovie = listviewContainer.randomMoviesModel.get(listviewContainer.randomMoviesList.currentIndex);
-                backgroundImage.source = currentMovie ? currentMovie.assets.screenshot || currentMovie.assets.background : ""; // Actualizar la imagen de fondo
+                backgroundImage.source = currentMovie ? currentMovie.assets.screenshot || currentMovie.assets.background : "";
             } else {
-                backgroundImage.source = ""; // Limpiar la imagen de fondo
+                backgroundImage.source = "";
             }
         } else if (currentFocus === "continue") {
             if (listviewContainer.continuePlayingMovies.count > 0) {
@@ -172,9 +295,9 @@ FocusScope {
                 listviewContainer.contentFlickable.contentY = listviewContainer.continuePlayingSection.y;
                 if (listviewContainer.continuePlayingList.currentIndex >= 0) {
                     currentMovie = listviewContainer.continuePlayingMovies.get(listviewContainer.continuePlayingList.currentIndex);
-                    backgroundImage.source = currentMovie ? currentMovie.assets.screenshot || currentMovie.assets.background : ""; // Actualizar la imagen de fondo
+                    backgroundImage.source = currentMovie ? currentMovie.assets.screenshot || currentMovie.assets.background : "";
                 } else {
-                    backgroundImage.source = ""; // Limpiar la imagen de fondo
+                    backgroundImage.source = "";
                 }
             } else {
                 currentFocus = "random";
@@ -185,9 +308,9 @@ FocusScope {
                 listviewContainer.contentFlickable.contentY = listviewContainer.favoriteSection.y;
                 if (listviewContainer.favoriteList.currentIndex >= 0) {
                     currentMovie = listviewContainer.favoriteMovies.get(listviewContainer.favoriteList.currentIndex);
-                    backgroundImage.source = currentMovie ? currentMovie.assets.screenshot || currentMovie.assets.background : ""; // Actualizar la imagen de fondo
+                    backgroundImage.source = currentMovie ? currentMovie.assets.screenshot || currentMovie.assets.background : "";
                 } else {
-                    backgroundImage.source = ""; // Limpiar la imagen de fondo
+                    backgroundImage.source = "";
                 }
             } else {
                 currentFocus = listviewContainer.continuePlayingMovies.count > 0 ? "continue" : "random";
@@ -198,14 +321,20 @@ FocusScope {
                 listviewContainer.contentFlickable.contentY = listviewContainer.unplayedMoviesSection.y;
                 if (listviewContainer.unplayedMoviesList.currentIndex >= 0) {
                     currentMovie = listviewContainer.unplayedMoviesModel.get(listviewContainer.unplayedMoviesList.currentIndex);
-                    backgroundImage.source = currentMovie ? currentMovie.assets.screenshot || currentMovie.assets.background : ""; // Actualizar la imagen de fondo
+                    backgroundImage.source = currentMovie ? currentMovie.assets.screenshot || currentMovie.assets.background : "";
                 } else {
-                    backgroundImage.source = ""; // Limpiar la imagen de fondo
+                    backgroundImage.source = "";
                 }
             } else {
                 currentFocus = listviewContainer.favoriteMovies.count > 0 ? "favorites" :
                 (listviewContainer.continuePlayingMovies.count > 0 ? "continue" : "random");
             }
+        } else if (currentFocus === "gridView") {
+            gridViewMovies.visible = true;
+            gridViewMovies.focus = true;
+        } else if (currentFocus === "gridViewTitles") {
+            gridViewTitles.visible = true;
+            gridViewTitles.focus = true;
         }
     }
 }

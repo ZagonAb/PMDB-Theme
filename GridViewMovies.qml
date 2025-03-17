@@ -1,15 +1,25 @@
 // GridViewMovies.qml
 import QtQuick 2.15
+import "utils.js" as Utils
 
 FocusScope {
     id: gridViewRoot
 
-    // Añade esta función en el componente FocusScope (gridViewRoot)
     function hideGrid() {
         isVisible = false;
         hasFocus = false;
+
+        // Limpia la imagen de fondo explícitamente
+        backgroundImage.source = "";
+        currentMovie = null;
+
+        // Asegúrate de que el overlay tenga la opacidad correcta
+        overlayImage.opacity = 0.7;
+
+        // Ahora cambia el foco al menú
         currentFocus = "menu";
         leftMenu.menuList.focus = true;
+
         // Asegúrate de que listviewContainer sea visible
         listviewContainer.visible = true;
 
@@ -18,13 +28,13 @@ FocusScope {
     }
 
     function printModelDates() {
-        console.log("Checking model dates:");
+        //console.log("Checking model dates:");
         for (var i = 0; i < currentModel.count && i < 5; i++) {
             var movie = currentModel.get(i);
             if (movie && movie.extra && movie.extra["added-date"]) {
-                console.log(i + ": " + movie.title + " - " + movie.extra["added-date"]);
+                //console.log(i + ": " + movie.title + " - " + movie.extra["added-date"]);
             } else {
-                console.log(i + ": " + movie.title + " - No date");
+                //console.log(i + ": " + movie.title + " - No date");
             }
         }
     }
@@ -60,7 +70,7 @@ FocusScope {
 
     onCurrentModelChanged: {
         if (currentModel) {
-            console.log("Model changed, has " + currentModel.count + " items");
+            //console.log("Model changed, has " + currentModel.count + " items");
             printModelDates();
         }
     }
@@ -92,11 +102,16 @@ FocusScope {
         Keys.onUpPressed: moveCurrentIndexUp()
         Keys.onDownPressed: moveCurrentIndexDown()
 
-        // En GridViewMovies.qml - Modifica el manejo de teclas
         Keys.onPressed: {
             if (api.keys.isCancel(event)) {
                 event.accepted = true;
                 hideGrid(); // Llamamos a una función para ocultar el grid
+            } else if (api.keys.isAccept(event)) {
+                event.accepted = true;
+                if (currentIndex >= 0) {
+                    Utils.showDetails(movieDetails, currentModel.get(currentIndex), "gridView"); // Pasar "gridView" como previousFocus
+                    gridViewRoot.visible = false; // Ocultar el grid al mostrar los detalles
+                }
             }
         }
     }
