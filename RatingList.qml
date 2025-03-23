@@ -12,7 +12,7 @@ FocusScope {
     property bool isExpanded: false
     property string selectedRatingRange: ""
 
-    property real scaleFactor: Math.min(width / 200, height / 800)
+    property real scaleFactor: Math.min(width / 200, height / 800) // Factor de escala base
     property real menuFontSize: 28 * scaleFactor
 
     visible: isVisible
@@ -208,7 +208,7 @@ FocusScope {
 
                 delegate: Rectangle {
                     id: ratingDelegate
-                    width: ratingsListView.width - 20
+                    width: ratingsListView.width //- 20
                     height: 60 // Altura más compacta como en la imagen
                     color: ListView.isCurrentItem && ratingsListView.focus ? "#006dc7" : "transparent"
                     radius: 5 // Sin bordes redondeados
@@ -226,9 +226,11 @@ FocusScope {
                             text: "★" // Estrella
                             color: "#ffcc00" // Color amarillo/dorado para la estrella
                             font {
-                                pixelSize: 18
+                                family: global.fonts.sans
+                                pixelSize: ratingList.menuFontSize
                                 bold: true
                             }
+
                             anchors.verticalCenter: parent.verticalCenter
                         }
 
@@ -237,10 +239,9 @@ FocusScope {
                             color: "white"
                             font {
                                 family: global.fonts.sans
-                                pixelSize: 18
+                                pixelSize: ratingList.menuFontSize
                                 bold: true
                             }
-
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
@@ -331,7 +332,7 @@ FocusScope {
                             Rectangle {
                                 id: posterContainer
                                 width: parent.width * 0.8
-                                height: parent.height * 0.7
+                                height: parent.height * 0.8
                                 color: "#022441"
                                 radius: 4
                                 clip: true
@@ -364,11 +365,18 @@ FocusScope {
 
                                 Text {
                                     text: model.title
-                                    font {
+                                    /*font {
                                         family: global.fonts.sans
                                         pixelSize: Math.max(10, delegateMovies.width * 0.03)
                                         bold: true
+                                    }*/
+
+                                    font {
+                                        family: global.fonts.sans
+                                        pixelSize: delegateMovies.menuFontSize
+                                        bold: true
                                     }
+
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap
                                     width: parent.width
@@ -379,9 +387,15 @@ FocusScope {
 
                                 Text {
                                     text: "Rating: " + Math.round(model.rating * 100) + "%"
-                                    font {
+                                    /*font {
                                         family: global.fonts.sans
                                         pixelSize: Math.max(8, delegateMovies.width * 0.025)
+                                    }*/
+
+                                    font {
+                                        family: global.fonts.sans
+                                        pixelSize: delegateMovies.menuFontSize
+                                        bold: true
                                     }
                                     horizontalAlignment: Text.AlignHCenter
                                     width: parent.width
