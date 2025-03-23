@@ -7,19 +7,30 @@ Rectangle {
     height: parent.height
     color: "#aa000000"
 
+    // Propiedades configurables para ajustar tamaños
+    property real scaleFactor: Math.min(width / 200, height / 800) // Factor de escala base
+    property real titleIconSize: 40 * scaleFactor // Tamaño del ícono del título
+    property real titleFontSize: 18 * scaleFactor // Tamaño de fuente del título
+    property real menuIconSize: 40 * scaleFactor // Tamaño de íconos del menú
+    property real menuFontSize: 28 * scaleFactor // Tamaño de fuente del menú
+    property real menuItemHeight: 80 * scaleFactor // Altura de cada elemento del menú
+    property real menuItemSpacing: 40 * scaleFactor // Espaciado entre ícono y texto
+    property real menuMargin: 20 * scaleFactor // Margen izquierdo del menú
+
     Row {
+        id: titleRow
         anchors {
             horizontalCenter: parent.horizontalCenter
             top: parent.top
-            topMargin: 20
+            topMargin: 20 * leftMenu.scaleFactor
         }
-        spacing: 10
+        spacing: 10 * leftMenu.scaleFactor
 
         Image {
             id: titleIcon
             source: "assets/icons/logo.svg"
-            width: 40
-            height: 40
+            width: leftMenu.titleIconSize
+            height: leftMenu.titleIconSize
             anchors.verticalCenter: parent.verticalCenter
             asynchronous: true
             mipmap: true
@@ -28,7 +39,11 @@ Rectangle {
         Text {
             text: "TMDB-THEME"
             color: "white"
-            font { family: global.fonts.sans; pixelSize: 18; bold: true }
+            font {
+                family: global.fonts.sans
+                pixelSize: leftMenu.titleFontSize
+                bold: true
+            }
             anchors.verticalCenter: parent.verticalCenter
         }
     }
@@ -38,9 +53,12 @@ Rectangle {
         width: parent.width
         height: contentHeight
         anchors {
-            verticalCenter: parent.verticalCenter
+            top: titleRow.bottom
+            topMargin: 20 * leftMenu.scaleFactor
             left: parent.left
             right: parent.right
+            bottom: parent.bottom
+            bottomMargin: 20 * leftMenu.scaleFactor
         }
         focus: currentFocus === "menu"
         model: ListModel {
@@ -54,23 +72,24 @@ Rectangle {
         }
 
         delegate: Rectangle {
+            id: menuItem
             width: parent.width
-            height: 80
+            height: leftMenu.menuItemHeight
             color: ListView.isCurrentItem && menuList.focus ? "#022441" : "transparent"
 
             Row {
                 anchors {
                     verticalCenter: parent.verticalCenter
                     left: parent.left
-                    leftMargin: 20
+                    leftMargin: leftMenu.menuMargin
                 }
-                spacing: 40
+                spacing: leftMenu.menuItemSpacing
 
                 Image {
                     id: icon
                     source: model.icon
-                    width: 40
-                    height: 40
+                    width: leftMenu.menuIconSize
+                    height: leftMenu.menuIconSize
                     anchors.verticalCenter: parent.verticalCenter
                     asynchronous: true
                     mipmap: true
@@ -79,7 +98,10 @@ Rectangle {
                 Text {
                     text: model.name
                     color: "white"
-                    font { family: global.fonts.sans; pixelSize: 28 }
+                    font {
+                        family: global.fonts.sans
+                        pixelSize: leftMenu.menuFontSize
+                    }
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
@@ -89,8 +111,10 @@ Rectangle {
         Keys.onPressed: {
             if (api.keys.isAccept(event)) {
                 event.accepted = true;
-                var selectedOption = menuList.model.get(menuList.currentIndex).name;
-                handleMenuSelection(selectedOption);
+                if (currentIndex >= 0 && currentIndex < model.count) {
+                    var selectedOption = model.get(currentIndex).name;
+                    handleMenuSelection(selectedOption);
+                }
             }
         }
 
@@ -103,35 +127,94 @@ Rectangle {
         Keys.onDownPressed: incrementCurrentIndex()
     }
 
+    // Función para recalcular los tamaños cuando cambie la resolución
+    function updateSizes() {
+        scaleFactor = Math.min(width / 200, height / 800)
+    }
+
+    // Conectamos los cambios de tamaño para actualizar los valores
+    onWidthChanged: updateSizes()
+    onHeightChanged: updateSizes()
 
     function handleMenuSelection(option) {
-        switch (option) {
-            case "Movies":
-                gridViewMovies.currentModel = collectionsItem.recentlyAddedMoviesModel;
-                gridViewMovies.isVisible = true;
-                currentFocus = "gridView";
-                break;
-            case "Continue":
-                gridViewMovies.currentModel = collectionsItem.continuePlayingMovies;
-                gridViewMovies.isVisible = true;
-                currentFocus = "gridView";
-                break;
-            case "Favorites":
-                gridViewMovies.currentModel = collectionsItem.favoriteMovies;
-                gridViewMovies.isVisible = true;
-                currentFocus = "gridView";
-                break;
-            case "Titles":
-                gridViewTitles.currentModel = collectionsItem.baseMoviesFilter;
-                gridViewTitles.isVisible = true;
-                currentFocus = "gridViewTitles";
-                break;
-            default:
-                gridViewMovies.isVisible = false;
-                gridViewTitles.isVisible = false;
-                currentFocus = "menu";
-                currentMovie = Utils.resetBackground(backgroundImage, overlayImage);
-                break;
+        try {
+            switch (option) {
+                case "Movies":
+                    if (collectionsItem && collectionsItem.recentlyAddedMoviesModel) {
+                        gridViewMovies.currentModel = collectionsItem.recentlyAddedMoviesModel;
+                        gridViewMovies.isVisible = true;
+                        currentFocus = "gridView";
+                    }
+                    break;
+                case "Years":
+                    // Ocultar listviewContainer cuando se accede a YearList
+                    listviewContainer.visible = false;
+                    yearList.isVisible = true;
+
+                    // Nos aseguramos de resetear la selección
+                    yearList.selectedYear = -1;
+                    yearList.isExpanded = false;
+
+                    // Actualizamos la lista de años (opcional, puede que ya esté actualizada)
+                    yearList.updateYearsList();
+
+                    // Damos el foco a la lista de años
+                    currentFocus = "yearList";
+                    yearList.focus = true; // Asegurar que YearList tenga el foco
+                    break;
+                case "Rating":
+                    // Ocultar listviewContainer cuando se accede a RatingList
+                    listviewContainer.visible = false;
+                    ratingList.isVisible = true;
+
+                    // Nos aseguramos de resetear la selección
+                    ratingList.selectedRatingRange = "";
+                    ratingList.isExpanded = false;
+
+                    // Actualizamos la lista de calificaciones
+                    ratingList.updateRatingsList();
+
+                    // Damos el foco a la lista de calificaciones
+                    currentFocus = "ratingList";
+                    ratingList.focus = true; // Asegurar que RatingList tenga el foco
+                    break;
+                case "Continue":
+                    if (collectionsItem && collectionsItem.continuePlayingMovies) {
+                        gridViewMovies.currentModel = collectionsItem.continuePlayingMovies;
+                        gridViewMovies.isVisible = true;
+                        currentFocus = "gridView";
+                    }
+                    break;
+                case "Favorites":
+                    if (collectionsItem && collectionsItem.favoriteMovies) {
+                        gridViewMovies.currentModel = collectionsItem.favoriteMovies;
+                        gridViewMovies.isVisible = true;
+                        currentFocus = "gridView";
+                    }
+                    break;
+                case "Titles":
+                    if (collectionsItem && collectionsItem.baseMoviesFilter) {
+                        gridViewTitles.currentModel = collectionsItem.baseMoviesFilter;
+                        gridViewTitles.isVisible = true;
+                        currentFocus = "gridViewTitles";
+                    }
+                    break;
+                default:
+                    gridViewMovies.isVisible = false;
+                    gridViewTitles.isVisible = false;
+                    currentFocus = "menu";
+                    currentMovie = Utils.resetBackground(backgroundImage, overlayImage);
+                    break;
+            }
+        } catch (e) {
+            console.log("Error al manejar la selección del menú: " + e);
+            // Retorno seguro al menú principal en caso de error
+            gridViewMovies.isVisible = false;
+            gridViewTitles.isVisible = false;
+            currentFocus = "menu";
+            backgroundImage.source = "";
+            overlayImage.opacity = 0.7;
+            currentMovie = null;
         }
     }
 }

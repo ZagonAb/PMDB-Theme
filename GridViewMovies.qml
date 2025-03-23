@@ -1,9 +1,44 @@
 // GridViewMovies.qml
 import QtQuick 2.15
+import QtQuick.Window 2.15
 import "utils.js" as Utils
 
 FocusScope {
     id: gridViewRoot
+
+    // Propiedad para controlar la posición del ScrollBar
+    property real scrollPosition: 0
+
+    // Propiedad para controlar el tamaño del ScrollBar
+    property real scrollBarSize: 0
+
+    function updateScrollBar() {
+        if (gridView.contentHeight <= gridView.height) {
+            scrollBar.visible = false;
+            return;
+        }
+
+        // Calcular posición y tamaño
+        scrollBarSize = Math.max(20, (gridView.height / gridView.contentHeight) * gridView.height);
+        scrollPosition = (gridView.contentY / (gridView.contentHeight - gridView.height)) * (gridView.height - scrollBarSize);
+
+        // Limitar valores para evitar desbordamientos
+        scrollPosition = Math.max(0, Math.min(scrollPosition, gridView.height - scrollBarSize));
+        scrollBar.visible = true;
+    }
+
+    Connections {
+        target: gridView
+        function onContentYChanged() { updateScrollBar(); }
+        function onHeightChanged() { updateScrollBar(); }
+        function onContentHeightChanged() { updateScrollBar(); }
+    }
+
+    Connections {
+        target: Window.window // Corrige la referencia a Window
+        function onWidthChanged() { updateScrollBar(); }
+        function onHeightChanged() { updateScrollBar(); }
+    }
 
     function hideGrid() {
         isVisible = false;
@@ -18,6 +53,7 @@ FocusScope {
 
         // Ahora cambia el foco al menú
         currentFocus = "menu";
+
         leftMenu.menuList.focus = true;
 
         // Asegúrate de que listviewContainer sea visible
@@ -78,16 +114,22 @@ FocusScope {
 
     // GridView
     GridView {
+
         id: gridView
-        anchors.fill: parent
-        cellWidth: parent.width / 5
+        anchors {
+            left: parent.left
+            right: scrollBar.left
+            top: parent.top
+            bottom: parent.bottom
+        }
+        width: parent.width * 0.9 // 90% del ancho total
+        //anchors.horizontalCenter: parent.horizontalCenter // Centrado horizontalmente
+        cellWidth: width / 5
         cellHeight: cellWidth * 1.5
         model: currentModel
         delegate: gridDelegate
         focus: hasFocus
 
-        // Añadimos márgenes generales
-        anchors.margins: 0
 
         // Cambiar el foco cuando se selecciona un elemento
         onCurrentIndexChanged: {
@@ -114,6 +156,40 @@ FocusScope {
                 }
             }
         }
+
+        // Añadir estas propiedades al GridView
+        interactive: true // Permite desplazamiento táctil/ratón
+        boundsBehavior: Flickable.StopAtBounds // Evita desplazamiento infinito
+
+        // Forzar la actualización del ScrollBar al desplazar
+        onMovementEnded: updateScrollBar()
+        onContentYChanged: updateScrollBar() // ¡Asegúrate de que esto esté presente!
+    }
+
+    Rectangle {
+        id: scrollBar
+        anchors {
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
+        }
+        width: 10
+        color: "transparent"
+        visible: false // Inicialmente oculto
+
+        Rectangle {
+            id: scrollBarHandle
+            anchors {
+                left: parent.left
+                right: parent.right
+            }
+            height: scrollBarSize
+            y: scrollPosition
+            color: "#006dc7"
+            radius: 0
+
+
+        }
     }
 
     Component {
@@ -129,20 +205,29 @@ FocusScope {
                 anchors.fill: parent
                 anchors.margins: 10  // Esto crea un espacio de 20px entre elementos (10px de cada lado)
 
-                Image {
-                    id: boxFront
+                Rectangle {
+                    id: posterContainer
                     anchors.fill: parent
-                    source: modelData.assets ? modelData.assets.boxFront : ""
-                    fillMode: Image.PreserveAspectCrop
-                    mipmap: true
-                    asynchronous: true
-                    cache: true
-                    sourceSize { width: 200; height: 300 }
-                    visible: status === Image.Ready
-                    //layer.enabled: delegateRoot.isFocused
-                    layer.enabled: gridView.currentIndex === index
-                    layer.effect: null
+                    color: "#022441"
+                    radius: 4
+                    clip: true
+
+                    Image {
+                        id: boxFront
+                        anchors.fill: parent
+                        source: modelData.assets ? modelData.assets.boxFront : ""
+                        fillMode: Image.PreserveAspectCrop
+                        mipmap: true
+                        asynchronous: true
+                        cache: true
+                        sourceSize { width: 200; height: 300 }
+                        visible: status === Image.Ready
+                        //layer.enabled: delegateRoot.isFocused
+                        layer.enabled: gridView.currentIndex === index
+                        layer.effect: null
+                    }
                 }
+
 
                 Rectangle {
                     id: titlePanel
@@ -150,7 +235,8 @@ FocusScope {
                     width: parent.width
                     height: 40
                     color: "#aa000000"
-                    visible: modelData && !modelData.assets.boxFront
+                    // Mostrar el título si no hay imagen o si la imagen está cargando
+                    visible: !modelData.assets.boxFront || boxFront.status !== Image.Ready
 
                     Text {
                         anchors.centerIn: parent
@@ -162,6 +248,7 @@ FocusScope {
                         horizontalAlignment: Text.AlignHCenter
                     }
                 }
+
 
                 Rectangle {
                     id: selectionRect

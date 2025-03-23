@@ -1,6 +1,7 @@
 // GridViewTitles.qml
 import QtQuick 2.15
 import "utils.js" as Utils
+import "qrc:/qmlutils" as PegasusUtils
 
 FocusScope {
     id: gridViewTitlesRoot
@@ -15,6 +16,7 @@ FocusScope {
     property var currentModel: null
     property bool isVisible: false
     property bool hasFocus: false
+    property var currentMovie: null
 
     // Función para ocultar el gridview
     function hideGrid() {
@@ -50,12 +52,15 @@ FocusScope {
         }
     }
 
-    // GridView
+    // GridView con exactamente 2 columnas
     GridView {
         id: gridView
         anchors.fill: parent
-        cellWidth: parent.width / 2  // Ajusta el ancho de las celdas según sea necesario
-        cellHeight: 200  // Ajusta la altura de las celdas según sea necesario
+
+        // Exactamente 2 columnas siempre
+        cellWidth: width / 2  // Siempre divide el ancho en 2
+        cellHeight: cellWidth * 0.43  // Mantiene proporción 2:1
+
         model: currentModel
         delegate: gridDelegate
         focus: hasFocus
@@ -96,25 +101,25 @@ FocusScope {
             width: gridView.cellWidth
             height: gridView.cellHeight
 
-            // Contenedor principal
+            // Contenedor principal - Responsive
             Rectangle {
+                id: cardContainer
                 anchors.fill: parent
-                anchors.margins: 10  // Espaciado entre celdas
-                color: "#191919"  // Color de fondo de la tarjeta
+                anchors.margins: parent.width * 0.02  // Margen proporcional
+                color: "#232323"  // Color de fondo de la tarjeta
                 radius: 5  // Bordes redondeados
 
-                // Fila para la portada y los detalles
+                // Fila para la portada y los detalles - Responsive
                 Row {
                     anchors.fill: parent
-                    anchors.leftMargin: 10
-                    anchors.topMargin: 10  // Añade margen superior a toda la fila
-                    spacing: 10
+                    anchors.margins: parent.width * 0.02
+                    spacing: parent.width * 0.02
 
-                    // Portada del juego (BOXFRONT)
+                    // Portada del juego (BOXFRONT) - Responsive
                     Rectangle {
-                        width: 100  // Ancho de la portada
+                        width: parent.width * 0.3  // 30% del ancho
                         height: parent.height
-                        color: "transparent"  // Fondo negro para la portada
+                        color: "transparent"
 
                         Image {
                             anchors.fill: parent
@@ -127,74 +132,134 @@ FocusScope {
                         }
                     }
 
-                    // Columna para los detalles del juego
+                    // Columna para los detalles del juego - Responsive
                     Column {
-                        width: parent.width - 110  // Ancho restante para los detalles
+                        width: parent.width * 0.68  // 68% del ancho restante
                         height: parent.height
-                        spacing: 5
+                        spacing: parent.height * 0.05
 
-                        // Título del juego
+                        // Título del juego - Responsive
                         Text {
                             text: modelData.title
                             color: "white"
-                            font { family: global.fonts.sans; pixelSize: 18; bold: true }
+                            font {
+                                family: global.fonts.sans
+                                pixelSize: Math.max(12, cardContainer.width * 0.03)  // Tamaño responsivo
+                                bold: true
+                            }
                             elide: Text.ElideRight
                             width: parent.width
                         }
 
-                        // Detalles (año de lanzamiento, rating, género)
+                        // Detalles (año de lanzamiento, rating, género) - Responsive
                         Row {
                             spacing: 5
+                            width: parent.width
+
                             Text {
                                 text: modelData.releaseYear || "N/A"
                                 color: "white"
-                                font { family: global.fonts.sans; pixelSize: 14 }
+                                font {
+                                    family: global.fonts.sans
+                                    pixelSize: Math.max(10, cardContainer.width * 0.025)  // Tamaño responsivo
+                                }
                             }
                             Text {
                                 text: "|"
                                 color: "white"
-                                font { family: global.fonts.sans; pixelSize: 14 }
+                                font {
+                                    family: global.fonts.sans
+                                    pixelSize: Math.max(10, cardContainer.width * 0.025)
+                                }
                             }
                             Text {
                                 text: (modelData.rating * 100).toFixed(0) + "%" || "N/A"
                                 color: "white"
-                                font { family: global.fonts.sans; pixelSize: 14 }
+                                font {
+                                    family: global.fonts.sans
+                                    pixelSize: Math.max(10, cardContainer.width * 0.025)
+                                }
                             }
                             Text {
                                 text: "|"
                                 color: "white"
-                                font { family: global.fonts.sans; pixelSize: 14 }
+                                font {
+                                    family: global.fonts.sans
+                                    pixelSize: Math.max(10, cardContainer.width * 0.025)
+                                }
                             }
                             Text {
                                 text: modelData.genre || "N/A"
                                 color: "white"
-                                font { family: global.fonts.sans; pixelSize: 14 }
+                                font {
+                                    family: global.fonts.sans
+                                    pixelSize: Math.max(10, cardContainer.width * 0.025)
+                                }
                                 elide: Text.ElideRight
-                                width: parent.width * 0.5
+                                width: parent.width * 0.4
                             }
                         }
 
-                        // Descripción del juego
-                        Text {
-                            text: modelData.description || "No description available."
-                            color: "white"
-                            font { family: global.fonts.sans; pixelSize: 14 }
-                            wrapMode: Text.WordWrap
+                        // Solución para AutoScroll condicionado
+                        Item {
                             width: parent.width
-                            maximumLineCount: 3  // Limitar a 3 líneas
+                            height: parent.height * 0.5
+
+                            // Texto estático (cuando no está seleccionado)
+                            Text {
+                                id: staticDescription
+                                anchors.fill: parent
+                                text: modelData.description || "No description available."
+                                color: "white"
+                                font {
+                                    family: global.fonts.sans
+                                    pixelSize: Math.max(10, cardContainer.width * 0.025)
+                                }
+                                wrapMode: Text.WordWrap
+                                elide: Text.ElideRight
+                                visible: gridView.currentIndex !== index
+                            }
+
+                            // AutoScroll (solo visible cuando está seleccionado)
+                            PegasusUtils.AutoScroll {
+                                anchors.fill: parent
+                                visible: gridView.currentIndex === index
+
+                                Text {
+                                    text: modelData.description || "No description available."
+                                    color: "white"
+                                    font {
+                                        family: global.fonts.sans
+                                        pixelSize: Math.max(10, cardContainer.width * 0.025)
+                                    }
+                                    wrapMode: Text.WordWrap
+                                    width: parent.width
+                                    horizontalAlignment: Text.AlignJustify
+                                }
+                            }
+                        }
+
+                        Text {
+                            text: Utils.formatVideoPath(modelData)  // Usar la nueva función para formatear la ruta
+                            color: "white"
+                            font {
+                                family: global.fonts.sans
+                                pixelSize: Math.max(10, cardContainer.width * 0.020)
+                            }
                             elide: Text.ElideRight
+                            width: parent.width
                         }
                     }
                 }
 
-                // Rectángulo de selección
+                // Rectángulo de selección - Responsivo
                 Rectangle {
                     anchors.fill: parent
                     color: "transparent"
                     border.color: "#006dc7"
-                    border.width: gridView.currentIndex === index ? 4 : 0
+                    border.width: gridView.currentIndex === index ? Math.max(2, parent.width * 0.007) : 0  // Ancho proporcional
                     visible: gridView.currentIndex === index
-                    radius: 5
+                    radius: 0
                     z: 100
                 }
             }

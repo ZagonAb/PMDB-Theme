@@ -7,40 +7,45 @@ Component {
 
     Item {
         id: delegateRoot
-        width: 200
-        height: 300
+        width: listviewContainer.delegateWidth
+        height: listviewContainer.delegateHeight
 
         property bool isFocused: ListView.isCurrentItem && ListView.view.focus
         property var game: modelData
         property var cachedData: null
         property real progressPercentage: 0
 
+        property real borderWidth: Math.max(2, 4 * listviewContainer.scaleFactor)
+        property real titlePanelHeight: Math.min(60, 50 * listviewContainer.scaleFactor)
+        property real titleFontSize: Math.min(16, 14 * listviewContainer.scaleFactor)
+        property real loadingSpinnerSize: Math.min(50, 40 * listviewContainer.scaleFactor)
+
         Component.onCompleted: {
             if (game) {
                 // Depuración - mostrar todas las propiedades extra disponibles
-                console.log("Título película:", game.title);
-                console.log("Propiedades extra disponibles:", JSON.stringify(game.extra));
+                //console.log("Título película:", game.title);
+                //console.log("Propiedades extra disponibles:", JSON.stringify(game.extra));
 
                 // Verificar específicamente Duration y playTime
                 var durationValue = game.extra ? game.extra["duration"] || game.extra["duration"] : null;
-                console.log("Duration value:", durationValue);
+                //console.log("Duration value:", durationValue);
 
                 // Obtener el tiempo de reproducción desde el archivo JSON
                 var watchedTime = Utils.getLastPosition(game.title) / 1000; // Convertir a segundos
-                console.log("Tiempo reproducido en segundos:", watchedTime);
+                //console.log("Tiempo reproducido en segundos:", watchedTime);
 
                 // Calculate progress percentage based on watchedTime and Duration
                 var totalDuration = 0;
                 if (durationValue) {
                     totalDuration = parseInt(durationValue) * 60; // Convert minutes to seconds
-                    console.log("Total duration en segundos:", totalDuration);
+                    //console.log("Total duration en segundos:", totalDuration);
                 } else {
-                    console.log("¡ADVERTENCIA! No se encontró Duration en los datos extra");
+                    //console.log("¡ADVERTENCIA! No se encontró Duration en los datos extra");
                 }
 
                 // Ensure we don't exceed 100% progress
                 progressPercentage = totalDuration > 0 ? Math.min(watchedTime / totalDuration, 1.0) : 0;
-                console.log("Porcentaje de progreso calculado:", progressPercentage);
+                //console.log("Porcentaje de progreso calculado:", progressPercentage);
 
                 cachedData = {
                     title: game.title || "",
@@ -56,6 +61,7 @@ Component {
         Rectangle {
             id: selectionRect
             anchors.fill: parent
+            anchors.margins: -borderWidth
             color: "transparent"
             border.color: "#006dc7"
             border.width: delegateRoot.isFocused ? 4 : 0
@@ -63,18 +69,30 @@ Component {
             z: 100
         }
 
-        Image {
-            id: poster
+        // Contenedor del poster con bordes redondeados
+        Rectangle {
+            id: posterContainer
             anchors.fill: parent
-            source: cachedData ? cachedData.posterUrl : ""
-            fillMode: Image.PreserveAspectCrop
-            mipmap: true
-            asynchronous: true
-            cache: true
-            sourceSize { width: 200; height: 300 }
-            visible: status === Image.Ready
-            layer.enabled: delegateRoot.isFocused
-            layer.effect: null
+            color: "#022441"
+            radius: 4
+            clip: true
+
+            Image {
+                id: poster
+                anchors.fill: parent
+                source: cachedData ? cachedData.posterUrl : ""
+                fillMode: Image.PreserveAspectCrop
+                mipmap: true
+                asynchronous: true
+                cache: true
+                sourceSize {
+                    width: delegateRoot.width * 1.5
+                    height: delegateRoot.height * 1.5
+                }
+                visible: status === Image.Ready
+                layer.enabled: delegateRoot.isFocused
+                layer.effect: null
+            }
         }
 
         // Efecto de oscurecimiento sobre la imagen de fondo

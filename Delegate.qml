@@ -6,12 +6,25 @@ Component {
 
     Item {
         id: delegateRoot
-        width: 200
-        height: 300
+        width: listviewContainer.delegateWidth
+        height: listviewContainer.delegateHeight
 
         property bool isFocused: ListView.isCurrentItem && ListView.view.focus
         property var game: modelData
         property var cachedData: null
+
+        // Propiedades responsivas para elementos internos
+        property real borderWidth: Math.max(2, 4 * listviewContainer.scaleFactor)
+        property real titlePanelHeight: Math.min(60, 50 * listviewContainer.scaleFactor)
+        property real titleFontSize: Math.min(16, 14 * listviewContainer.scaleFactor)
+        property real loadingSpinnerSize: Math.min(50, 40 * listviewContainer.scaleFactor)
+
+        // Escala cuando está enfocado
+        scale: isFocused ? 1.01 : 1.0
+
+        Behavior on scale {
+            NumberAnimation { duration: 150; easing.type: Easing.OutQuad }
+        }
 
         Component.onCompleted: {
             if (game) {
@@ -23,45 +36,62 @@ Component {
             }
         }
 
+        // Sombra cuando está enfocado
         Rectangle {
-            id: selectionRect
+            id: shadow
             anchors.fill: parent
+            anchors.margins: -borderWidth
             color: "transparent"
             border.color: "#006dc7"
-            border.width: delegateRoot.isFocused ? 4 : 0
+            border.width: delegateRoot.isFocused ? borderWidth : 0
             visible: delegateRoot.isFocused
             z: 100
         }
 
-        Image {
-            id: poster
+        // Contenedor del poster con bordes redondeados
+        Rectangle {
+            id: posterContainer
             anchors.fill: parent
-            source: cachedData ? cachedData.posterUrl : ""
-            fillMode: Image.PreserveAspectCrop
-            mipmap: true
-            asynchronous: true
-            cache: true
-            sourceSize { width: 200; height: 300 }
-            visible: status === Image.Ready
-            layer.enabled: delegateRoot.isFocused
-            layer.effect: null
+            color: "#022441"
+            radius: 4
+            clip: true
+
+            Image {
+                id: poster
+                anchors.fill: parent
+                source: cachedData ? cachedData.posterUrl : ""
+                fillMode: Image.PreserveAspectCrop
+                mipmap: true
+                asynchronous: true
+                cache: true
+                sourceSize {
+                    width: delegateRoot.width * 1.5
+                    height: delegateRoot.height * 1.5
+                }
+                visible: status === Image.Ready
+            }
         }
 
         Rectangle {
             id: titlePanel
             anchors.bottom: parent.bottom
             width: parent.width
-            height: 60
+            height: titlePanelHeight
             color: "#aa000000"
-            visible: cachedData && !cachedData.hasPoster
+            radius: 0
+            visible: cachedData && (!cachedData.hasPoster || !poster.visible)
 
             Text {
                 anchors.centerIn: parent
                 text: cachedData ? cachedData.title : ""
                 color: "white"
-                font { family: global.fonts.sans; pixelSize: 14 }
+                font {
+                    family: global.fonts.sans
+                    pixelSize: titleFontSize
+                    bold: delegateRoot.isFocused
+                }
                 elide: Text.ElideRight
-                width: parent.width - 20
+                width: parent.width - (listviewContainer.listMargin * 2)
                 horizontalAlignment: Text.AlignHCenter
             }
         }
@@ -69,14 +99,15 @@ Component {
         Rectangle {
             id: loadingIndicator
             anchors.fill: parent
-            color: "transparent"
+            color: "#022441"
+            radius: 4
             visible: poster.status !== Image.Ready
 
             Image {
                 id: loadingSpinner
                 anchors.centerIn: parent
-                width: 40
-                height: 40
+                width: loadingSpinnerSize
+                height: loadingSpinnerSize
                 source: "assets/icons/loading-spinner.svg"
                 mipmap: true
                 visible: poster.status === Image.Loading
@@ -88,6 +119,25 @@ Component {
                     to: 360
                     duration: 1000
                 }
+            }
+
+            // Mostrar título mientras carga
+            Text {
+                anchors {
+                    bottom: parent.bottom
+                    horizontalCenter: parent.horizontalCenter
+                    margins: listviewContainer.listMargin
+                }
+                text: cachedData ? cachedData.title : ""
+                color: "white"
+                font {
+                    family: global.fonts.sans
+                    pixelSize: titleFontSize
+                }
+                elide: Text.ElideRight
+                width: parent.width - (listviewContainer.listMargin * 2)
+                horizontalAlignment: Text.AlignHCenter
+                visible: cachedData && cachedData.title
             }
         }
 
@@ -109,13 +159,6 @@ Component {
                     game.launch();
                 }
             }
-        }
-
-        transitions: Transition {
-            from: ""
-            to: "selected"
-            reversible: true
-            NumberAnimation { properties: "scale"; duration: 150; easing.type: Easing.OutQuad }
         }
     }
 }

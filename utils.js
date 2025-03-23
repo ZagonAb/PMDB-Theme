@@ -43,11 +43,6 @@ function getMainVideoPathCached(gameItem) {
     return "";
 }
 
-function resetBackground(backgroundImage, overlayImage) {
-    backgroundImage.source = "";
-    overlayImage.opacity = 0.7;
-}
-
 function showDetails(movieDetails, movie, previousFocus) {
     if (movieDetails && movie) {
         movieDetails.currentMovie = movie;
@@ -67,7 +62,7 @@ function hideDetails(movieDetails) {
 
 function getProgressPercentage(lastPosition, duration) {
     if (!lastPosition || !duration) {
-        console.log("Advertencia: lastPosition o duration no están definidos.");
+        //console.log("Advertencia: lastPosition o duration no están definidos.");
         return 0;
     }
 
@@ -75,13 +70,13 @@ function getProgressPercentage(lastPosition, duration) {
     var totalDurationMs = duration * 60 * 1000;
 
     // Depuración: Mostrar la duración total en milisegundos
-    console.log("Duración total en milisegundos:", totalDurationMs);
+    //console.log("Duración total en milisegundos:", totalDurationMs);
 
     // Calcular el porcentaje de progreso
     var progress = lastPosition / totalDurationMs;
 
     // Depuración: Mostrar el progreso calculado antes de asegurar que no exceda el 100%
-    console.log("Progreso calculado (antes de asegurar 100%):", progress);
+    //console.log("Progreso calculado (antes de asegurar 100%):", progress);
 
     // Asegurarnos de que el progreso no exceda el 100%
     return Math.min(progress, 1.0);
@@ -109,14 +104,7 @@ function updateProgress(game) {
     };
 }
 
-// Función para forzar la actualización del modelo
-function forceModelUpdate(model) {
-    if (model && model.invalidate) {
-        model.invalidate();
-    }
-}
 
-// utils.js
 function getLastPosition(title) {
     try {
         // Ruta relativa al archivo tmdb-theme.json en la misma carpeta del tema
@@ -132,7 +120,118 @@ function getLastPosition(title) {
             }
         }
     } catch (e) {
-        console.error("Error al leer el archivo JSON:", e);
+        //console.error("Error al leer el archivo JSON:", e);
     }
     return 0; // Si no se encuentra el título o hay un error, devuelve 0
+}
+
+// Función para obtener la imagen de fondo de una película de forma segura
+function getBackgroundImage(movie) {
+    if (!movie) return "";
+    if (!movie.assets) return "";
+
+    // Intenta devolver screenshot o background, o cadena vacía si ninguno existe
+    return (movie.assets.screenshot || movie.assets.background || "");
+}
+
+// Función para resetear el fondo y devolver null
+function resetBackground(backgroundImage, overlayImage) {
+    if (backgroundImage) {
+        backgroundImage.source = "";
+    }
+
+    if (overlayImage) {
+        overlayImage.opacity = 0.7;
+    }
+
+    return null;
+}
+
+// Función para forzar una actualización del modelo
+function forceModelUpdate(model) {
+    if (!model) return;
+
+    // Una manera de forzar una actualización es cambiar una propiedad
+    // Esta es una implementación genérica, puedes adaptarla según tus necesidades
+    try {
+        // Si el modelo tiene un método de actualización, úsalo
+        if (typeof model.update === "function") {
+            model.update();
+        }
+        // O puedes intentar otras técnicas como:
+        // - Si es un ListModel, puedes recorrerlo y tocar una propiedad
+        // - Si es un proxyModel, puedes reajustar los filtros
+    } catch (e) {
+        console.log("Error al actualizar el modelo: " + e);
+    }
+}
+
+// Función para manejar de forma segura el acceso a los elementos del modelo
+function safeModelGet(model, index) {
+    if (!model) return null;
+    if (typeof model.count === "undefined") return null;
+    if (index < 0 || index >= model.count) return null;
+
+    try {
+        return model.get(index);
+    } catch (e) {
+        console.log("Error al acceder al modelo en el índice " + index + ": " + e);
+        return null;
+    }
+}
+
+// Función auxiliar para verificar si una lista está vacía
+function isModelEmpty(model) {
+    return !model || !model.count || model.count <= 0;
+}
+
+function formatVideoPath(gameItem) {
+    // Primero obtenemos la ruta completa usando la función existente
+    var fullPath = getMainVideoPathCached(gameItem);
+
+    if (!fullPath || fullPath === "") {
+        return "No disponible";
+    }
+
+    // Dividir la ruta por las barras
+    var parts = fullPath.split('/');
+
+    // Si la ruta es muy larga, la acortamos para mostrar "Disco X/.../nombre_archivo.extensión"
+    if (parts.length > 2) {
+        // Tomamos el primer segmento (que podría ser "Disco X")
+        var firstPart = parts[0];
+
+        // Si el primer segmento está vacío (porque la ruta comienza con '/'), usamos el segundo
+        if (firstPart === "") {
+            firstPart = parts[1]; // Tomamos el primer directorio real
+        }
+
+        // Tomamos el último segmento (nombre del archivo con extensión)
+        var lastPart = parts[parts.length - 1];
+
+        // Formateamos como "Disco X/.../nombre_archivo.extensión"
+        return firstPart + "/.../" + lastPart;
+    }
+
+    // Si la ruta es corta, la devolvemos tal cual
+    return fullPath;
+}
+
+function hideYearList() {
+    isVisible = false;
+    isExpanded = false;
+    selectedYear = -1;
+    // Mostrar listviewContainer al salir
+    listviewContainer.visible = true;
+    yearList.visible = false;
+    currentFocus = "menu";
+}
+
+// Añadir esta función en utils.js
+function hideRatingList() {
+    ratingList.isVisible = false;
+    ratingList.visible = false;
+    listviewContainer.visible = true;
+    currentFocus = "menu";
+    leftMenu.menuList.focus = true;
 }
