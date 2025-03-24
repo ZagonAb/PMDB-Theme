@@ -118,6 +118,17 @@ FocusScope {
         isVisible: false
     }
 
+    GenreList {
+        id: genreList
+        anchors {
+            left: leftMenu.right
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
+        }
+        isVisible: false
+    }
+
     Delegate { id: movieDelegate }
 
     Keys.onPressed: {

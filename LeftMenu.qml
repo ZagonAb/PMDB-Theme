@@ -1,5 +1,6 @@
 // LeftMenu.qml
 import QtQuick 2.15
+import QtQuick.Layouts 1.15
 
 Rectangle {
     id: leftMenu
@@ -16,6 +17,21 @@ Rectangle {
     property real menuItemHeight: 80 * scaleFactor // Altura de cada elemento del menú
     property real menuItemSpacing: 40 * scaleFactor // Espaciado entre ícono y texto
     property real menuMargin: 20 * scaleFactor // Margen izquierdo del menú
+
+    // Timer para inicializar GenreList con un pequeño retraso
+    /*Timer {
+        id: genreListTimer
+        interval: 100
+        repeat: false
+        onTriggered: {
+            if (genreList.isVisible) {
+                genreList.focus = true;
+                if (genreList.genereListView) {
+                    genreList.genereListView.focus = true;
+                }
+            }
+        }
+    }*/
 
     Row {
         id: titleRow
@@ -177,6 +193,20 @@ Rectangle {
                     // Damos el foco a la lista de calificaciones
                     currentFocus = "ratingList";
                     ratingList.focus = true; // Asegurar que RatingList tenga el foco
+                    break;
+                case "Genres":
+                    // Ocultar listviewContainer cuando se accede a GenreList
+                    listviewContainer.visible = false;
+
+                    // Hacer visible la vista de géneros
+                    genreList.isVisible = true;
+                    genreList.genereVisible = true;
+                    genreList.isExpanded = true;
+
+                    currentFocus = "genreList";
+                    genreList.focus = true;
+                    //genreListTimer.start();
+
                     break;
                 case "Continue":
                     if (collectionsItem && collectionsItem.continuePlayingMovies) {

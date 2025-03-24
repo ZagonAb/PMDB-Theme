@@ -235,3 +235,5 @@ function hideRatingList() {
     currentFocus = "menu";
     leftMenu.menuList.focus = true;
 }
+
+
