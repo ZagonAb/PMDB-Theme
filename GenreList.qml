@@ -1,4 +1,3 @@
-// GenreList.qml
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import SortFilterProxyModel 0.2
@@ -13,9 +12,8 @@ FocusScope {
     property string selectedGenre: ""
     property bool genereVisible: isVisible
 
-    property real scaleFactor: Math.min(width / 400, height / 1000)
+    property real scaleFactor: Math.min(width / 200, height / 800)
     property real menuFontSize: 28 * scaleFactor
-    property real labelHeight: 30
 
     visible: isVisible
     focus: isVisible
@@ -39,13 +37,11 @@ FocusScope {
 
     // Function to normalize and extract base genres
     function normalizeGenre(genre) {
-        // Trim whitespace and convert to title case
         var normalizedGenre = genre.trim()
         .split(' ')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
 
-        // Extract the first word as the base genre
         return normalizedGenre.split(' ')[0];
     }
 
@@ -85,39 +81,16 @@ FocusScope {
         return categoriesArray;
     }
 
-    // Modelo para películas filtradas por género
-    /*ListModel {
-        id: genreFilteredModel
-
-        function filterCategory(category) {
-            clear();
-            for (var i = 0; i < api.allGames.count; i++) {
-                var movie = api.allGames.get(i);
-                if (!isMovie(movie) || !movie.genre) continue;
-
-                var movieCategories = movie.genre.split(',').map(function(genre) {
-                    return genre.trim().split(/[\s\/-]/)[0].toLowerCase();
-                });
-
-                if (movieCategories.includes(category.toLowerCase())) {
-                    append(movie);
-                }
-            }
-            updateInitialImages();
-        }
-    }*/
-
-    // Agrega esta función en la sección de funciones de GenreList.qml
     function formatGenreText(genreText, selectedGenre) {
         if (!genreText || !selectedGenre) return genreText;
 
         var genres = genreText.split(',');
         var result = [];
+        var selectedBase = selectedGenre.split(/[\s\/-]/)[0].toLowerCase();
 
         for (var i = 0; i < genres.length; i++) {
             var genre = genres[i].trim();
             var baseGenre = genre.split(/[\s\/-]/)[0].toLowerCase();
-            var selectedBase = selectedGenre.split(/[\s\/-]/)[0].toLowerCase();
 
             if (baseGenre === selectedBase) {
                 result.push('<font color="#ff6600">' + genre + '</font>');
@@ -135,18 +108,19 @@ FocusScope {
         function filterCategory(category) {
             clear();
             var tempMovies = [];
+            var categoryLower = category.toLowerCase();
 
             // Primero recolectamos todas las películas que coinciden
             for (var i = 0; i < api.allGames.count; i++) {
                 var movie = api.allGames.get(i);
                 if (!isMovie(movie)) continue;
 
-                    var movieCategories = movie.genre ?
-                    movie.genre.split(',').map(function(genre) {
-                        return genre.trim().split(/[\s\/-]/)[0].toLowerCase();
-                    }) : [];
+                var movieCategories = movie.genre ?
+                movie.genre.split(',').map(function(genre) {
+                    return genre.trim().split(/[\s\/-]/)[0].toLowerCase();
+                }) : [];
 
-                if (movieCategories.includes(category.toLowerCase())) {
+                if (movieCategories.includes(categoryLower)) {
                     tempMovies.push(movie);
                 }
             }
@@ -162,7 +136,10 @@ FocusScope {
                 append(movie);
             });
 
-            updateInitialImages();
+            // Asegurar que el GridView tenga un elemento seleccionado
+            if (tempMovies.length > 0 && moviesGridView.count > 0) {
+                moviesGridView.currentIndex = 0;
+            }
         }
     }
 
@@ -199,18 +176,17 @@ FocusScope {
             }
         }
 
-        // UI Layout
         Row {
             anchors.fill: parent
             spacing: 10
 
-            // ListView to display genres
             ListView {
                 id: genresListView
                 width: parent.width * 0.15
                 height: parent.height * 0.90
-                focus: true  // Ensure this is set to true
+                focus: true
                 anchors.verticalCenter: parent.verticalCenter
+                clip: true
 
                 property int indexToPosition: -1
                 property var categoriesModel: []
@@ -225,29 +201,24 @@ FocusScope {
                     radius: 5
 
                     Row {
-                        width: parent.width // Asegurar que el Row ocupe el ancho completo del padre
-                        height: parent.height // Asegurar que el Row ocupe la altura completa del padre
-                        spacing: 10 // Espaciado entre los elementos del Row
+                        anchors.centerIn: parent
+                        spacing: 10
 
                         Text {
-                            text: modelData.name.charAt(0).toUpperCase() + modelData.name.slice(1)
+                            text: modelData ? (modelData.name.charAt(0).toUpperCase() + modelData.name.slice(1)) : ""
                             color: "white"
                             font {
                                 family: global.fonts.sans
                                 pixelSize: genreList.menuFontSize
                                 bold: true
                             }
-                            width: parent.width // Ajustar el ancho del Text al ancho del Row
-                            height: parent.height // Ajustar la altura del Text a la altura del Row
-                            horizontalAlignment: Text.AlignHCenter // Centrar el texto horizontalmente
-                            verticalAlignment: Text.AlignVCenter // Centrar el texto verticalmente
                         }
+                    }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                genresListView.currentIndex = index;
-                            }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            genresListView.currentIndex = index;
                         }
                     }
                 }
@@ -261,8 +232,7 @@ FocusScope {
                     }
                 }
 
-                // Reemplaza el bloque Keys.onPressed actual con este:
-                Keys.onPressed: {
+                Keys.onPressed: function(event) {
                     if (event.key === Qt.Key_Up) {
                         event.accepted = true;
                         if (genresListView.currentIndex > 0) {
@@ -277,29 +247,29 @@ FocusScope {
                         }
                     } else if (event.key === Qt.Key_Right) {
                         event.accepted = true;
-                        moviesGridView.focus = true;
+                        if (moviesGridView.count > 0) {
+                            moviesGridView.focus = true;
+                        }
                     } else if (event.key === Qt.Key_Left) {
-                        event.accepted = true; // Evita que el evento se propague al padre
-                        // No hacemos nada, evitamos que salga del GenreList
+                        event.accepted = true;
                     } else if (api.keys.isCancel(event)) {
                         event.accepted = true;
-                        isVisible = false;
+                        isExpanded = false;
+
+                        genreList.isVisible = false;
+                        genreList.visible = false;
                         listviewContainer.visible = true;
                         currentFocus = "menu";
                         leftMenu.menuList.focus = true;
-                        isExpanded = false;
 
                         if (genresListView.categoriesModel.length > 0) {
                             selectedGenre = genresListView.categoriesModel[0].name;
                         }
-
                     }
                 }
 
-                // Añade esto para manejar cuando el componente recibe foco:
                 onFocusChanged: {
                     if (focus && genresListView) {
-                        genresListView.focus = true;
                         if (genresListView.categoriesModel.length > 0) {
                             genresListView.currentIndex = 0;
                         }
@@ -307,6 +277,7 @@ FocusScope {
                 }
             }
 
+            // GridView con optimizaciones pero manteniendo compatibilidad
             GridView {
                 id: moviesGridView
                 width: parent.width - genresListView.width - 20
@@ -314,6 +285,11 @@ FocusScope {
                 cellWidth: width / 4
                 cellHeight: height / 2
                 clip: true
+                visible: true // Aseguramos que sea visible
+
+                // Optimizaciones de rendimiento moderadas
+                cacheBuffer: cellHeight * 4
+                boundsBehavior: Flickable.StopAtBounds
 
                 model: genreFilteredModel
 
@@ -321,6 +297,16 @@ FocusScope {
                     id: delegateMovies
                     width: moviesGridView.cellWidth
                     height: moviesGridView.cellHeight
+                    visible: true // Aseguramos que el delegado sea visible
+
+                    property real menuFontSize: 20
+
+                    Binding {
+                        target: delegateMovies
+                        property: "menuFontSize"
+                        value: genreList.menuFontSize
+                        when: genreList.menuFontSize > 0
+                    }
 
                     Rectangle {
                         width: parent.width * 0.8
@@ -346,18 +332,26 @@ FocusScope {
                             Rectangle {
                                 id: posterContainer
                                 width: parent.width * 0.8
-                                height: parent.height * 0.8 // Reducimos un poco para dar espacio a los textos
+                                height: parent.height * 0.8
                                 color: "#022441"
                                 radius: 4
                                 clip: true
                                 anchors.horizontalCenter: parent.horizontalCenter
 
+                                // Carga de imágenes optimizada pero confiable
                                 Image {
                                     source: model.assets.boxFront
                                     anchors.fill: parent
                                     fillMode: Image.PreserveAspectCrop
                                     asynchronous: true
                                     mipmap: true
+                                    cache: true
+
+                                    // Optimización moderada de tamaño
+                                    sourceSize {
+                                        width: parent.width > 300 ? 300 : parent.width
+                                        height: parent.height > 400 ? 400 : parent.height
+                                    }
 
                                     Text {
                                         visible: parent.status !== Image.Ready
@@ -371,19 +365,14 @@ FocusScope {
                             Text {
                                 id: movieTitle
                                 text: model.title
-                                /*font {
-                                    family: global.fonts.sans
-                                    pixelSize: Math.max(12, delegateMovies.width * 0.03)
-                                    bold: true
-                                }*/
-
                                 font {
                                     family: global.fonts.sans
-                                    pixelSize: delegateMovies.menuFontSize
+                                    pixelSize: Math.max(10, delegateMovies.width * 0.050)
                                     bold: true
                                 }
-
                                 horizontalAlignment: Text.AlignHCenter
+                                elide: Text.ElideRight
+                                maximumLineCount: 2
                                 wrapMode: Text.WordWrap
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 width: parent.width * 0.8
@@ -399,55 +388,84 @@ FocusScope {
                                     pixelSize: Math.max(10, delegateMovies.width * 0.045)
                                 }
                                 horizontalAlignment: Text.AlignHCenter
+                                elide: Text.ElideRight
+                                maximumLineCount: 1
                                 wrapMode: Text.WordWrap
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 width: parent.width * 0.8
-                                color: "#a0a0a0" // Color por defecto (será sobrescrito por el rich text)
+                                color: "#a0a0a0"
                                 anchors.top: movieTitle.bottom
                                 anchors.topMargin: 5
-                                textFormat: Text.RichText // Esto permite usar HTML básico para el formato
+                                textFormat: Text.RichText
                             }
                         }
                     }
                 }
 
-                onCurrentIndexChanged: {
-                    if (currentIndex !== -1 && count > 0) {
-                        var movie = genreFilteredModel.get(currentIndex);
+                onFocusChanged: {
+                    if (!focus) {
+                        backgroundImage.source = "";
+                    } else if (currentIndex >= 0 && genreFilteredModel.count > 0) {
+                        var selectedMovie = genreFilteredModel.get(currentIndex);
+                        if (selectedMovie) {
+                            root.currentMovie = selectedMovie;
+                            backgroundImage.source = Utils.getBackgroundImage(selectedMovie);
+                        }
                     }
                 }
 
-                // Handle navigation keys in GridView
-                Keys.onPressed: {
+                onCurrentIndexChanged: {
+                    if (focus && currentIndex >= 0 && genreFilteredModel.count > 0) {
+                        var selectedMovie = genreFilteredModel.get(currentIndex);
+                        if (selectedMovie) {
+                            root.currentMovie = selectedMovie;
+                            backgroundImage.source = Utils.getBackgroundImage(selectedMovie);
+                        }
+                    }
+                }
+
+                Keys.onPressed: function(event) {
                     if (event.key === Qt.Key_Left) {
                         event.accepted = true;
-                        if (moviesGridView.currentIndex === 0) {
+                        if (currentIndex === 0) {
                             genresListView.focus = true;
-                        } else {
-                            moviesGridView.moveCurrentIndexLeft();
+                            backgroundImage.source = "";
+                        } else if (currentIndex > 0) {
+                            moveCurrentIndexLeft();
                         }
                     } else if (event.key === Qt.Key_Right) {
                         event.accepted = true;
-                        moviesGridView.moveCurrentIndexRight();
+                        if (currentIndex < count - 1) {
+                            moveCurrentIndexRight();
+                        }
                     } else if (event.key === Qt.Key_Up) {
                         event.accepted = true;
-                        moviesGridView.moveCurrentIndexUp();
+                        if (currentIndex >= 0) {
+                            moveCurrentIndexUp();
+                        }
                     } else if (event.key === Qt.Key_Down) {
                         event.accepted = true;
-                        moviesGridView.moveCurrentIndexDown();
+                        if (currentIndex >= 0) {
+                            moveCurrentIndexDown();
+                        }
                     } else if (api.keys.isCancel(event)) {
                         event.accepted = true;
                         genresListView.focus = true;
+                        backgroundImage.source = "";
+                    } else if (!event.isAutoRepeat && api.keys.isAccept(event) && currentIndex >= 0 && currentIndex < count) {
+                        event.accepted = true;
+                        Utils.showDetails(movieDetails, genreFilteredModel.get(currentIndex), "GenreList");
                     }
                 }
             }
         }
     }
+
     onIsVisibleChanged: {
         if (isVisible) {
             console.log("GenreList se hizo visible");
 
-            // Siempre regenerar las categorías para asegurar datos actualizados
+            // Regenerar las categorías para asegurar datos actualizados
             genresListView.categoriesModel = createCategoriesFromGenres();
 
             if (genresListView.categoriesModel.length > 0) {
@@ -456,12 +474,13 @@ FocusScope {
                 genresListView.selectedCategory = genresListView.categoriesModel[0].name;
                 genreFilteredModel.filterCategory(genresListView.selectedCategory);
 
-                // Explicitly set focus and ensure it's done immediately
-                genresListView.forceActiveFocus();
+                // Explícitamente dar foco y asegurarnos que se haga inmediatamente
                 genresListView.focus = true;
 
-                gameGridView.focus = false;
-                gameGridView.currentIndex = 0;
+                // Asegurarnos que el GridView tenga un elemento seleccionado
+                if (genreFilteredModel.count > 0) {
+                    moviesGridView.currentIndex = 0;
+                }
 
                 console.log("Inicializado con género: " + genresListView.selectedCategory +
                 ", películas encontradas: " + genreFilteredModel.count);

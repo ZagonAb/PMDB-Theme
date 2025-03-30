@@ -11,9 +11,10 @@ FocusScope {
     property bool isVisible: false
     property bool isExpanded: false
     property string selectedRatingRange: ""
-
     property real scaleFactor: Math.min(width / 200, height / 800) // Factor de escala base
     property real menuFontSize: 28 * scaleFactor
+
+
 
     visible: isVisible
     focus: isVisible
@@ -79,7 +80,7 @@ FocusScope {
 
             // Si no se colocó en ningún rango (por si acaso)
             if (!placed) {
-                console.log("Película no clasificada realmente: " + movie.title + " - Rating: " + rating);
+                //console.log("Película no clasificada realmente: " + movie.title + " - Rating: " + rating);
                 // Asignar al rango 0.0 como fallback
                 moviesByRating.get("0.0").push(movie);
             }
@@ -300,12 +301,17 @@ FocusScope {
                 cellHeight: height / 2 // 2 filas
                 clip: true // Para evitar que los elementos se salgan del área visible
 
+                cacheBuffer: cellHeight * 8
+                boundsBehavior: Flickable.StopAtBounds // Comportamiento más predecible
+
                 model: filteredMoviesByRating
 
                 delegate: Item {
                     id: delegateMovies
                     width: moviesGridView.cellWidth
                     height: moviesGridView.cellHeight
+
+                    property real menuFontSize: ratingList.menuFontSize
 
                     Rectangle {
                         width: parent.width * 0.8
@@ -318,6 +324,8 @@ FocusScope {
                         radius: 0
                         z: 100
                     }
+
+                    Component.onCompleted: console.log("scaleFactor:", scaleFactor, "menuFontSize:", menuFontSize)
 
                     Column {
                         anchors.fill: parent
@@ -365,15 +373,10 @@ FocusScope {
 
                                 Text {
                                     text: model.title
-                                    /*font {
-                                        family: global.fonts.sans
-                                        pixelSize: Math.max(10, delegateMovies.width * 0.03)
-                                        bold: true
-                                    }*/
 
                                     font {
                                         family: global.fonts.sans
-                                        pixelSize: delegateMovies.menuFontSize
+                                        pixelSize: Math.max(8, delegateMovies.width * 0.050)
                                         bold: true
                                     }
 
@@ -387,14 +390,10 @@ FocusScope {
 
                                 Text {
                                     text: "Rating: " + Math.round(model.rating * 100) + "%"
-                                    /*font {
-                                        family: global.fonts.sans
-                                        pixelSize: Math.max(8, delegateMovies.width * 0.025)
-                                    }*/
 
                                     font {
                                         family: global.fonts.sans
-                                        pixelSize: delegateMovies.menuFontSize
+                                        pixelSize: Math.max(8, delegateMovies.width * 0.045)
                                         bold: true
                                     }
                                     horizontalAlignment: Text.AlignHCenter
@@ -407,42 +406,56 @@ FocusScope {
                     }
                 }
 
+                onFocusChanged: {
+                    if (!focus) {
+                        backgroundImage.source = "";
+                    } else if (currentIndex >= 0 && filteredMoviesByRating.count > 0) {
+                        var selectedMovie = filteredMoviesByRating.get(currentIndex);
+                        if (selectedMovie) {
+                            root.currentMovie = selectedMovie;
+                            backgroundImage.source = Utils.getBackgroundImage(selectedMovie);
+                        }
+                    }
+                }
+
+                onCurrentIndexChanged: {
+                    if (focus && currentIndex >= 0 && filteredMoviesByRating.count > 0) {
+                        var selectedMovie = filteredMoviesByRating.get(currentIndex);
+                        if (selectedMovie) {
+                            root.currentMovie = selectedMovie;
+                            backgroundImage.source = Utils.getBackgroundImage(selectedMovie);
+                        }
+                    }
+                }
+
                 // Manejar la navegación con las teclas de dirección en el GridView
                 Keys.onPressed: {
                     if (event.key === Qt.Key_Left) {
                         event.accepted = true;
                         if (moviesGridView.currentIndex === 0) {
-                            // Si estamos en el índice 0 del GridView, volver al ListView
                             ratingsListView.focus = true;
+                            backgroundImage.source = ""; // Limpiar background al volver
                         } else {
-                            // Mover al ítem anterior en el GridView
                             moviesGridView.moveCurrentIndexLeft();
                         }
                     } else if (event.key === Qt.Key_Right) {
                         event.accepted = true;
-                        // Mover al siguiente ítem en el GridView
                         moviesGridView.moveCurrentIndexRight();
                     } else if (event.key === Qt.Key_Up) {
                         event.accepted = true;
-                        // Mover al ítem de arriba en el GridView
                         moviesGridView.moveCurrentIndexUp();
                     } else if (event.key === Qt.Key_Down) {
                         event.accepted = true;
-                        // Mover al ítem de abajo en el GridView
                         moviesGridView.moveCurrentIndexDown();
                     } else if (api.keys.isCancel(event)) {
                         event.accepted = true;
-                        // Volver al ListView cuando se presiona la tecla Cancel
                         ratingsListView.focus = true;
+                        backgroundImage.source = ""; // Limpiar background al retroceder
                     } else if (api.keys.isAccept(event)) {
                         event.accepted = true;
-                        if (moviesGridView.currentIndex >= 0 && filteredMoviesByRating.count > 0) {
-                            // Acción para abrir los detalles de la película seleccionada
-                            var selectedMovie = filteredMoviesByRating.get(moviesGridView.currentIndex);
-                            if (selectedMovie) {
-                                currentMovie = selectedMovie;
-                                // Abrir detalles de la película o reproducirla directamente
-                            }
+                        if (currentIndex >= 0) {
+                            Utils.showDetails(movieDetails, filteredMoviesByRating.get(currentIndex), "RatingList"); // Pasar "gridViewTitles" como previousFocus
+                            //genreList.visible = false; // Ocultar el grid al mostrar los detalles
                         }
                     }
                 }
@@ -470,7 +483,7 @@ FocusScope {
     }
 
     function setFilterForRating(min, max, label) {
-        console.log("Filtrando por: " + label + " (min: " + min + ", max: " + max + ")");
+        //console.log("Filtrando por: " + label + " (min: " + min + ", max: " + max + ")");
 
         if (label === "0.0") {
             // Modificar para mostrar todas las películas sin calificación

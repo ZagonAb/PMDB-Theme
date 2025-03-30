@@ -1,6 +1,7 @@
 // GridViewTitles.qml
 import QtQuick 2.15
 import "utils.js" as Utils
+import QtGraphicalEffects 1.15
 import "qrc:/qmlutils" as PegasusUtils
 
 FocusScope {
@@ -238,16 +239,37 @@ FocusScope {
                                 }
                             }
                         }
-
+                        // Versión simplificada pero funcional
                         Text {
-                            text: Utils.formatVideoPath(modelData)  // Usar la nueva función para formatear la ruta
-                            color: "white"
+                            width: parent.width
+                            height: Math.max(20, cardContainer.width * 0.04)
+                            text: Utils.formatVideoPath(modelData)
+                            color: "#AAAAAA"
                             font {
                                 family: global.fonts.sans
-                                pixelSize: Math.max(10, cardContainer.width * 0.020)
+                                pixelSize: Math.max(12, cardContainer.width * 0.022)
                             }
                             elide: Text.ElideRight
-                            width: parent.width
+                            wrapMode: Text.NoWrap
+
+                            MouseArea {
+                                id: pathMouseArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    // Alternar entre vista completa y abreviada al hacer clic
+                                    parent.text = (parent.elide === Text.ElideRight)
+                                    ? Utils.formatVideoPath(modelData, true)
+                                    : Utils.formatVideoPath(modelData);
+                                    parent.elide = (parent.elide === Text.ElideRight)
+                                    ? Text.ElideNone
+                                    : Text.ElideRight;
+                                    parent.wrapMode = (parent.wrapMode === Text.NoWrap)
+                                    ? Text.Wrap
+                                    : Text.NoWrap;
+                                }
+                            }
                         }
                     }
                 }

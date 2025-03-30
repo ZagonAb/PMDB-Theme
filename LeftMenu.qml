@@ -125,7 +125,7 @@ Rectangle {
 
         // Manejar la tecla de "Enter" o "Aceptar" para abrir el GridView
         Keys.onPressed: {
-            if (api.keys.isAccept(event)) {
+            if (!event.isAutoRepeat && api.keys.isAccept(event)) {
                 event.accepted = true;
                 if (currentIndex >= 0 && currentIndex < model.count) {
                     var selectedOption = model.get(currentIndex).name;
@@ -197,14 +197,15 @@ Rectangle {
                 case "Genres":
                     // Ocultar listviewContainer cuando se accede a GenreList
                     listviewContainer.visible = false;
-
                     // Hacer visible la vista de géneros
                     genreList.isVisible = true;
+                    genreList.visible = true;
                     genreList.genereVisible = true;
                     genreList.isExpanded = true;
 
                     currentFocus = "genreList";
                     genreList.focus = true;
+
                     //genreListTimer.start();
 
                     break;

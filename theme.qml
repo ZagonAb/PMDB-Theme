@@ -90,9 +90,16 @@ FocusScope {
         isVisible: false
     }
 
+    /*MovieDetails {
+     *       id: movieDetails
+     *       anchors.fill: parent
+}*/
+
+    // Modifica MovieDetails para usar el reproductor global
     MovieDetails {
         id: movieDetails
         anchors.fill: parent
+        externalMediaPlayer: globalMediaPlayer // Usa el nuevo nombre de propiedad
     }
 
     YearList {
@@ -127,6 +134,17 @@ FocusScope {
             bottom: parent.bottom
         }
         isVisible: false
+    }
+
+    MediaPlayerComponent {
+        id: globalMediaPlayer
+        width: parent.width
+        height: parent.height
+
+        anchors.centerIn: parent
+        z: 2000
+        visible: false
+        movieDetailsRoot: movieDetails  // Pasar referencia
     }
 
     Delegate { id: movieDelegate }

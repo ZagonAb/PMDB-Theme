@@ -114,7 +114,6 @@ FocusScope {
 
     // GridView
     GridView {
-
         id: gridView
         anchors {
             left: parent.left
@@ -255,7 +254,7 @@ FocusScope {
                     anchors.fill: parent
                     color: "transparent"
                     border.color: "#006dc7"
-                    border.width: gridView.currentIndex === index ? 4 : 0
+                    border.width: gridView.currentIndex === index ? 3 : 0
                     visible: gridView.currentIndex === index
                     z: 100
                 }
