@@ -46,9 +46,14 @@ function getMainVideoPathCached(gameItem) {
 function showDetails(movieDetails, movie, previousFocus) {
     if (movieDetails && movie) {
         movieDetails.currentMovie = movie;
-        movieDetails.previousFocus = previousFocus || ""; // Asegúrate de que previousFocus no sea undefined
+        movieDetails.previousFocus = previousFocus || "";
         movieDetails.visible = true;
         movieDetails.focus = true;
+
+        // Forzar la actualización del texto del botón Favorite
+        if (movieDetails.btnFavorite && movieDetails.btnFavorite.favoriteText) {
+            movieDetails.btnFavorite.favoriteText.text = isGameFavorite(movie.title) ? "Favorite -" : "Favorite +";
+        }
     }
 }
 
@@ -185,36 +190,39 @@ function isModelEmpty(model) {
     return !model || !model.count || model.count <= 0;
 }
 
-function formatVideoPath(gameItem) {
-    // Primero obtenemos la ruta completa usando la función existente
+
+function formatVideoPath(gameItem, showFullPath = false) {
     var fullPath = getMainVideoPathCached(gameItem);
+    if (!fullPath || fullPath === "") return "No disponible";
+    if (showFullPath) return fullPath;
 
-    if (!fullPath || fullPath === "") {
-        return "No disponible";
-    }
+    // Extraer el nombre del disco (asumiendo que está en la primera parte de la ruta)
+    var diskMatch = fullPath.match(/(Disco [A-Z0-9]+|Disco_[A-Z0-9]+|Disk [A-Z0-9]+|Disk_[A-Z0-9]+)/i);
+    var diskName = diskMatch ? diskMatch[0] : "Media";
 
-    // Dividir la ruta por las barras
-    var parts = fullPath.split('/');
+    // Extraer el nombre del archivo
+    var fileName = fullPath.split('/').pop();
 
-    // Si la ruta es muy larga, la acortamos para mostrar "Disco X/.../nombre_archivo.extensión"
-    if (parts.length > 2) {
-        // Tomamos el primer segmento (que podría ser "Disco X")
-        var firstPart = parts[0];
+    return diskName + "/.../" + fileName;
+}
 
-        // Si el primer segmento está vacío (porque la ruta comienza con '/'), usamos el segundo
-        if (firstPart === "") {
-            firstPart = parts[1]; // Tomamos el primer directorio real
+// Añade esto al final de utils.js
+function getMovieFilePath(movie, showFullPath = false) {
+    if (!movie || !movie.title) return "No disponible";
+
+    // Buscar el juego por título en la colección de películas
+    for (var i = 0; i < api.collections.count; ++i) {
+        var collection = api.collections.get(i);
+        if (collection.shortName.toLowerCase() === "movies") {
+            for (var j = 0; j < collection.games.count; ++j) {
+                var game = collection.games.get(j);
+                if (game.title === movie.title) {
+                    return formatVideoPath(game, showFullPath);
+                }
+            }
         }
-
-        // Tomamos el último segmento (nombre del archivo con extensión)
-        var lastPart = parts[parts.length - 1];
-
-        // Formateamos como "Disco X/.../nombre_archivo.extensión"
-        return firstPart + "/.../" + lastPart;
     }
-
-    // Si la ruta es corta, la devolvemos tal cual
-    return fullPath;
+    return "No disponible";
 }
 
 function hideYearList() {
@@ -236,4 +244,59 @@ function hideRatingList() {
     leftMenu.menuList.focus = true;
 }
 
+// utils.js - Función alternativa
+function launchGameFromMoviesCollection(title) {
+    // Buscar la colección "movies" por shortName
+    for (var i = 0; i < api.collections.count; ++i) {
+        var collection = api.collections.get(i);
+        if (collection.shortName.toLowerCase() === "movies") {
+            // Buscar el juego por título
+            for (var j = 0; j < collection.games.count; ++j) {
+                var game = collection.games.get(j);
+                if (game.title === title) {
+                    game.launch();
+                    return true;
+                }
+            }
+        }
+    }
+    console.error("Juego no encontrado en la colección 'movies'");
+    return false;
+}
+
+// utils.js - Nuevas funciones para manejar favoritos
+function isGameFavorite(title) {
+    for (var i = 0; i < api.collections.count; ++i) {
+        var collection = api.collections.get(i);
+        if (collection.shortName.toLowerCase() === "movies") {
+            for (var j = 0; j < collection.games.count; ++j) {
+                var game = collection.games.get(j);
+                if (game.title === title) {
+                    return game.favorite; // Devuelve true/false
+                }
+            }
+        }
+    }
+    return false;
+}
+
+function toggleGameFavorite(title) {
+    for (var i = 0; i < api.collections.count; ++i) {
+        var collection = api.collections.get(i);
+        if (collection.shortName.toLowerCase() === "movies") {
+            for (var j = 0; j < collection.games.count; ++j) {
+                var game = collection.games.get(j);
+                if (game.title === title) {
+                    game.favorite = !game.favorite; // Alterna el estado
+                    return game.favorite; // Devuelve el nuevo estado
+                }
+            }
+        }
+    }
+    return false;
+}
+
+function getFavoriteButtonText(title) {
+    return isGameFavorite(title) ? "Favorite -" : "Favorite +";
+}
 
