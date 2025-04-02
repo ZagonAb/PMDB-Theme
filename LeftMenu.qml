@@ -85,6 +85,7 @@ Rectangle {
             ListElement { name: "Rating"; icon: "assets/icons/rating.svg" }
             ListElement { name: "Continue"; icon: "assets/icons/continueplaying.svg" }
             ListElement { name: "Favorites"; icon: "assets/icons/favorite.svg" }
+            ListElement { name: "Search"; icon: "assets/icons/search.svg" }
         }
 
         delegate: Rectangle {
@@ -121,6 +122,19 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
+
+            // Línea divisoria solo para el elemento "Movies"
+            Rectangle {
+                visible: model.name === "Movies"
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    bottom: parent.bottom
+                    margins: 5 * leftMenu.scaleFactor
+                }
+                height: 2
+                color: "#022441"
+            }
         }
 
         // Manejar la tecla de "Enter" o "Aceptar" para abrir el GridView
@@ -152,7 +166,7 @@ Rectangle {
     onWidthChanged: updateSizes()
     onHeightChanged: updateSizes()
 
-    function handleMenuSelection(option) {
+    /*function handleMenuSelection(option) {
         try {
             switch (option) {
                 case "Movies":
@@ -242,6 +256,89 @@ Rectangle {
             // Retorno seguro al menú principal en caso de error
             gridViewMovies.isVisible = false;
             gridViewTitles.isVisible = false;
+            currentFocus = "menu";
+            backgroundImage.source = "";
+            overlayImage.opacity = 0.7;
+            currentMovie = null;
+        }
+    }*/
+
+    function handleMenuSelection(option) {
+        try {
+            switch (option) {
+                case "Movies":
+                    if (collectionsItem && collectionsItem.recentlyAddedMoviesModel) {
+                        gridViewMovies.currentModel = collectionsItem.recentlyAddedMoviesModel;
+                        gridViewMovies.isVisible = true;
+                        currentFocus = "gridView";
+                    }
+                    break;
+                case "Years":
+                    listviewContainer.visible = false;
+                    yearList.isVisible = true;
+                    yearList.selectedYear = -1;
+                    yearList.isExpanded = false;
+                    yearList.updateYearsList();
+                    currentFocus = "yearList";
+                    yearList.focus = true;
+                    break;
+                case "Rating":
+                    listviewContainer.visible = false;
+                    ratingList.isVisible = true;
+                    ratingList.selectedRatingRange = "";
+                    ratingList.isExpanded = false;
+                    ratingList.updateRatingsList();
+                    currentFocus = "ratingList";
+                    ratingList.focus = true;
+                    break;
+                case "Genres":
+                    listviewContainer.visible = false;
+                    genreList.isVisible = true;
+                    genreList.visible = true;
+                    genreList.genereVisible = true;
+                    genreList.isExpanded = true;
+                    currentFocus = "genreList";
+                    genreList.focus = true;
+                    break;
+                case "Continue":
+                    if (collectionsItem && collectionsItem.continuePlayingMovies) {
+                        gridViewMovies.currentModel = collectionsItem.continuePlayingMovies;
+                        gridViewMovies.isVisible = true;
+                        currentFocus = "gridView";
+                    }
+                    break;
+                case "Favorites":
+                    if (collectionsItem && collectionsItem.favoriteMovies) {
+                        gridViewMovies.currentModel = collectionsItem.favoriteMovies;
+                        gridViewMovies.isVisible = true;
+                        currentFocus = "gridView";
+                    }
+                    break;
+                case "Titles":
+                    if (collectionsItem && collectionsItem.baseMoviesFilter) {
+                        gridViewTitles.currentModel = collectionsItem.baseMoviesFilter;
+                        gridViewTitles.isVisible = true;
+                        currentFocus = "gridViewTitles";
+                    }
+                    break;
+                case "Search":
+                    listviewContainer.visible = false
+                    searchMovie.showSearch()
+                    currentFocus = "search"
+                    break
+                default:
+                    gridViewMovies.isVisible = false;
+                    gridViewTitles.isVisible = false;
+                    searchMovie.hideSearch();
+                    currentFocus = "menu";
+                    currentMovie = Utils.resetBackground(backgroundImage, overlayImage);
+                    break;
+            }
+        } catch (e) {
+            console.log("Error al manejar la selección del menú: " + e);
+            gridViewMovies.isVisible = false;
+            gridViewTitles.isVisible = false;
+            searchMovie.hideSearch();
             currentFocus = "menu";
             backgroundImage.source = "";
             overlayImage.opacity = 0.7;

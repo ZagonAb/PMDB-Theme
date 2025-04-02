@@ -209,7 +209,8 @@ FocusScope {
                             color: "white"
                             font {
                                 family: global.fonts.sans
-                                pixelSize: genreList.menuFontSize
+                                //pixelSize: genreList.menuFontSize
+                                pixelSize: Math.max(10, genresListView.width * 0.14)
                                 bold: true
                             }
                         }

@@ -1,6 +1,15 @@
 // MovieDetails.qml
-import QtQuick 2.15
+/*import QtQuick 2.15
 import QtGraphicalEffects 1.15
+import "utils.js" as Utils*/
+
+import QtQuick 2.15
+import QtQuick.Layouts 1.15
+import QtQuick.Window 2.15
+import QtGraphicalEffects 1.15
+import QtMultimedia 5.15
+import QtQml.Models 2.15
+import SortFilterProxyModel 0.2
 import "utils.js" as Utils
 
 FocusScope {
@@ -135,6 +144,17 @@ FocusScope {
                                 elide: Text.ElideRight
                                 wrapMode: Text.NoWrap
                                 anchors.verticalCenter: parent.verticalCenter
+
+                                Connections {
+                                    target: movieDetailsRoot
+                                    function onCurrentMovieChanged() {
+                                        if (currentMovie) {
+                                            text = Utils.getMovieFilePath(currentMovie);
+                                            elide = Text.ElideRight;
+                                            wrapMode = Text.NoWrap;
+                                        }
+                                    }
+                                }
 
                                 MouseArea {
                                     anchors.fill: parent
@@ -332,7 +352,7 @@ FocusScope {
                                     focus: true
 
                                     Text {
-                                        text: "Launch"
+                                        text: "Play Movie"
                                         color: "white"
                                         font {
                                             family: global.fonts.sans
@@ -405,7 +425,7 @@ FocusScope {
 
                                     Text {
                                         id: favoriteText
-                                        text: currentMovie ? Utils.getFavoriteButtonText(currentMovie.title) : "Favorite +"
+                                        text: currentMovie ? Utils.getFavoriteButtonText(currentMovie.title) : "Add to favorites"
                                         color: "white"
                                         font {
                                             family: global.fonts.sans
@@ -431,7 +451,7 @@ FocusScope {
                                             if (currentMovie) {
                                                 // Alterna el estado y actualiza el texto
                                                 var isNowFavorite = Utils.toggleGameFavorite(currentMovie.title);
-                                                favoriteText.text = isNowFavorite ? "Favorite -" : "Favorite +";
+                                                favoriteText.text = isNowFavorite ? "Remove from favorites" : "Add to favorites";
                                             }
                                         } else if (api.keys.isUp(event)) {
                                             event.accepted = true;
@@ -554,7 +574,7 @@ FocusScope {
                             color: "white"
                             font {
                                 family: global.fonts.sans
-                                pixelSize: Math.max(16, 32 * rectangleitem.scaleRatio) // Escalar tamaño de fuente con un mínimo
+                                pixelSize: Math.max(28, 42 * rectangleitem.scaleRatio) // Escalar tamaño de fuente con un mínimo
                                 bold: true
                             }
                             width: parent.width
@@ -565,27 +585,45 @@ FocusScope {
                             spacing: parent.height * 0.05
                             //topPadding: -10
 
-                            Item {
-                                width: classificationText.width + 10 * rectangleitem.scaleRatio
-                                height: classificationText.height + 8 * rectangleitem.scaleRatio
-
-                                Rectangle {
-                                    anchors.fill: parent
-                                    color: "transparent"
-                                    border.color: "white"
-                                    border.width: 1 * Math.max(0.5, rectangleitem.scaleRatio) // Escalar grosor de borde con un mínimo
-                                    radius: 4 * rectangleitem.scaleRatio
-                                }
+                            Row {
+                                spacing: 15 * rectangleitem.scaleRatio
 
                                 Text {
-                                    id: classificationText
-                                    anchors.centerIn: parent
-                                    text: currentMovie && currentMovie.extra && currentMovie.extra["classification"] ?
-                                    currentMovie.extra["classification"] : "PG"
+                                    text: "Rated"
                                     color: "white"
+
+                                    anchors.verticalCenter: parent.verticalCenter
+
                                     font {
                                         family: global.fonts.sans
-                                        pixelSize: Math.max(10, 16 * rectangleitem.scaleRatio) // Escalar tamaño de fuente con un mínimo
+                                        pixelSize: Math.max(16, 22 * rectangleitem.scaleRatio)
+                                    }
+                                }
+
+                                Item {
+                                    width: classificationText.width + 20 * rectangleitem.scaleRatio
+                                    height: classificationText.height + 8 * rectangleitem.scaleRatio
+
+                                    Rectangle {
+                                        id: ratedRectang
+                                        anchors.fill: parent
+                                        color: "transparent"
+                                        border.color: "white"
+                                        border.width: 1 * Math.max(0.5, rectangleitem.scaleRatio)
+                                        radius: 4 * rectangleitem.scaleRatio
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+
+                                    Text {
+                                        id: classificationText
+                                        anchors.centerIn: parent
+                                        text: currentMovie && currentMovie.extra && currentMovie.extra["classification"]
+                                        ? currentMovie.extra["classification"] : "NR"
+                                        color: "white"
+                                        font {
+                                            family: global.fonts.sans
+                                            pixelSize: Math.max(16, 22 * rectangleitem.scaleRatio)
+                                        }
                                     }
                                 }
                             }
@@ -594,9 +632,10 @@ FocusScope {
                             Text {
                                 text: currentMovie && currentMovie.releaseYear ? currentMovie.releaseYear : "N/A"
                                 color: "white"
+                                anchors.verticalCenter: parent.verticalCenter
                                 font {
                                     family: global.fonts.sans
-                                    pixelSize: Math.max(12, 18 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                    pixelSize: Math.max(16, 22 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
                                 }
                             }
 
@@ -604,9 +643,10 @@ FocusScope {
                             Text {
                                 text: currentMovie && currentMovie.genre ? currentMovie.genre : "N/A"
                                 color: "white"
+                                anchors.verticalCenter: parent.verticalCenter
                                 font {
                                     family: global.fonts.sans
-                                    pixelSize: Math.max(12, 18 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                    pixelSize: Math.max(16, 22 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
                                 }
                             }
 
@@ -615,24 +655,25 @@ FocusScope {
                                 text: currentMovie && currentMovie.extra && currentMovie.extra["duration"] ?
                                 currentMovie.extra["duration"] + " min" : "N/A"
                                 color: "white"
+                                anchors.verticalCenter: parent.verticalCenter
                                 font {
                                     family: global.fonts.sans
-                                    pixelSize: Math.max(12, 18 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                    pixelSize: Math.max(16, 22 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
                                 }
                             }
                         }
 
                         // Rating visual con círculo
                         Item {
-                            height: 80 * rectangleitem.scaleRatio
+                            height: 100 * rectangleitem.scaleRatio
                             width: parent.width
 
                             Row {
                                 spacing: parent.height * 0.1
 
                                 Item {
-                                    width: 70 * rectangleitem.scaleRatio
-                                    height: 70 * rectangleitem.scaleRatio
+                                    width: 90 * rectangleitem.scaleRatio
+                                    height: 90 * rectangleitem.scaleRatio
 
                                     // Fondo circular oscuro
                                     Rectangle {
@@ -703,7 +744,7 @@ FocusScope {
                                     color: "white"
                                     font {
                                         family: global.fonts.sans
-                                        pixelSize: Math.max(10, 18 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                        pixelSize: Math.max(14, 22 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
                                         bold: true
                                     }
                                     lineHeight: 1.1
@@ -739,7 +780,7 @@ FocusScope {
 
                                         Text {
                                             text: parent.currentEmojis[index]
-                                            font.pixelSize: Math.max(14, 28 * rectangleitem.scaleRatio) // Escalar tamaño de emojis
+                                            font.pixelSize: Math.max(24, 42 * rectangleitem.scaleRatio) // Escalar tamaño de emojis
                                             opacity: index === 0 ? 1.0 : (index === 1 ? 0.7 : 0.4)
                                             anchors.verticalCenter: parent.verticalCenter
                                         }
@@ -763,7 +804,7 @@ FocusScope {
                             color: "#CCCCCC"
                             font {
                                 family: global.fonts.sans
-                                pixelSize: Math.max(14, 22 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                pixelSize: Math.max(16, 24 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
                                 italic: true
                             }
                             width: parent.width
@@ -776,7 +817,7 @@ FocusScope {
                             color: "white"
                             font {
                                 family: global.fonts.sans
-                                pixelSize: Math.max(14, 24 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                pixelSize: Math.max(18, 26 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
                                 bold: true
                             }
                             topPadding: 10 * rectangleitem.scaleRatio
@@ -788,7 +829,7 @@ FocusScope {
                             color: "white"
                             font {
                                 family: global.fonts.sans
-                                pixelSize: Math.max(12, 24 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                pixelSize: Math.max(18, 24 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
                             }
                             wrapMode: Text.WordWrap
                             width: parent.width
@@ -819,7 +860,7 @@ FocusScope {
                                         color: "#BBBBBB"
                                         font {
                                             family: global.fonts.sans
-                                            pixelSize: Math.max(10, 16 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                            pixelSize: Math.max(16, 24 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
                                             bold: true
                                         }
                                     }
@@ -829,7 +870,7 @@ FocusScope {
                                         color: "white"
                                         font {
                                             family: global.fonts.sans
-                                            pixelSize: Math.max(10, 16 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                            pixelSize: Math.max(16, 24 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
                                         }
                                     }
                                 }

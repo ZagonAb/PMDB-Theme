@@ -147,6 +147,17 @@ FocusScope {
         movieDetailsRoot: movieDetails  // Pasar referencia
     }
 
+    SearchMovie {
+        id: searchMovie
+        anchors {
+            left: leftMenu.right
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
+        }
+        isVisible: false
+    }
+
     Delegate { id: movieDelegate }
 
     Keys.onPressed: {
@@ -154,7 +165,9 @@ FocusScope {
             case Qt.Key_Left:
                 //console.log("Tecla Left presionada")
                 event.accepted = true
-                if (currentFocus === "gridViewTitles") {
+                if (currentFocus === "search") {
+                    searchMovie.clearAndHide()
+                } else if  (currentFocus === "gridViewTitles") {
                     gridViewTitles.hideGrid();
                 } else if (currentFocus === "yearList") {
                     // Manejo de retroceso desde yearList
@@ -251,6 +264,10 @@ FocusScope {
             backgroundImage.source = "";
             overlayImage.opacity = 0.7;
             currentMovie = null;
+        } else if (currentFocus === "search") {
+            searchMovie.visible = true
+            searchMovie.focus = true
+            searchMovie.showSearch()
         } else if (currentFocus === "recently") {
             listviewContainer.recentlyMoviesList.focus = true;
             listviewContainer.contentFlickable.contentY = listviewContainer.recentlyAddedSection.y;
