@@ -52,7 +52,7 @@ function showDetails(movieDetails, movie, previousFocus) {
 
         // Forzar la actualización del texto del botón Favorite
         if (movieDetails.btnFavorite && movieDetails.btnFavorite.favoriteText) {
-            movieDetails.btnFavorite.favoriteText.text = isGameFavorite(movie.title) ? "Favorite -" : "Favorite +";
+            movieDetails.btnFavorite.favoriteText.text = isGameFavorite(movie.title) ? "Remove from favorites" : "Add to favorites";
         }
     }
 }
@@ -108,7 +108,6 @@ function updateProgress(game) {
         totalDuration: durationValue ? durationValue * 60 * 1000 : 0 // Convertir a milisegundos
     };
 }
-
 
 function getLastPosition(title) {
     try {
@@ -189,7 +188,6 @@ function safeModelGet(model, index) {
 function isModelEmpty(model) {
     return !model || !model.count || model.count <= 0;
 }
-
 
 function formatVideoPath(gameItem, showFullPath = false) {
     var fullPath = getMainVideoPathCached(gameItem);
@@ -297,6 +295,13 @@ function toggleGameFavorite(title) {
 }
 
 function getFavoriteButtonText(title) {
-    return isGameFavorite(title) ? "Favorite -" : "Favorite +";
+    return isGameFavorite(title) ? "Remove from favorites" : "Add to favorites";
+}
+
+function updateBackground() {
+    if (resultsGrid.focus && resultsGrid.currentIndex >= 0 && searchResultsModel.count > 0) {
+        currentMovie = searchResultsModel.get(resultsGrid.currentIndex)
+        backgroundImage.source = currentMovie ? Utils.getBackgroundImage(currentMovie) : ""
+    }
 }
 
