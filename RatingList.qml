@@ -37,73 +37,49 @@ FocusScope {
     function createCategoriesFromRatings() {
         var moviesByRating = new Map();
 
-        // Crear rangos más precisos y sin superposiciones
-        var ratingRanges = [
-            { label: "9.0", min: 0.90, max: 1.0 },
-            { label: "8.5", min: 0.85, max: 0.899 },
-            { label: "8.1", min: 0.81, max: 0.849 },
-            { label: "7.9", min: 0.79, max: 0.809 },
-            { label: "7.5", min: 0.75, max: 0.789 },
-            { label: "7.4", min: 0.74, max: 0.749 },
-            { label: "7.3", min: 0.73, max: 0.739 },
-            { label: "7.2", min: 0.72, max: 0.729 },
-            { label: "7.0", min: 0.70, max: 0.719 },
-            { label: "6.0", min: 0.60, max: 0.699 },
-            { label: "5.0", min: 0.50, max: 0.599 },
-            { label: "4.0", min: 0.40, max: 0.499 },
-            { label: "3.0", min: 0.30, max: 0.399 },
-            { label: "2.0", min: 0.20, max: 0.299 },
-            { label: "1.0", min: 0.10, max: 0.199 },
-            { label: "0.0", min: 0.0, max: 0.099 }
-        ];
+        // Crear rangos simplificados de 0.0 a 9.0
+        var ratingRanges = [];
+        for (var i = 9; i >= 0; i--) {
+            ratingRanges.push({
+                label: i + ".0",
+                min: i/10,
+                max: (i+1)/10 - 0.0001 // Pequeña tolerancia para evitar solapamientos
+            });
+        }
 
         // Inicializar los mapas para cada rango
-        for (var j = 0; j < ratingRanges.length; j++) {
-            moviesByRating.set(ratingRanges[j].label, []);
-        }
+        ratingRanges.forEach(range => {
+            moviesByRating.set(range.label, []);
+        });
 
         // Agrupar películas por rangos de calificación
         for (var k = 0; k < baseMoviesFilter.count; k++) {
             var movie = baseMoviesFilter.get(k);
             var rating = movie.rating; // Ya está en escala 0-1
 
-            // Determinar a qué rango pertenece esta película
-            var placed = false;
-            for (var l = 0; l < ratingRanges.length; l++) {
-                // Usar una pequeña tolerancia para manejar errores de punto flotante
-                if (rating >= ratingRanges[l].min && rating <= ratingRanges[l].max) {
-                    moviesByRating.get(ratingRanges[l].label).push(movie);
-                    placed = true;
-                    break;
-                }
-            }
+            // Encontrar el rango correspondiente
+            var rangeIndex = Math.floor(rating * 10);
+            if (rangeIndex > 9) rangeIndex = 9; // Por si acaso hay valores > 0.999
+            if (rangeIndex < 0) rangeIndex = 0; // Por si acaso hay valores < 0
 
-            // Si no se colocó en ningún rango (por si acaso)
-            if (!placed) {
-                //console.log("Película no clasificada realmente: " + movie.title + " - Rating: " + rating);
-                // Asignar al rango 0.0 como fallback
-                moviesByRating.get("0.0").push(movie);
-            }
+            var rangeLabel = rangeIndex + ".0";
+            moviesByRating.get(rangeLabel).push(movie);
         }
 
-        // Convertir el mapa a un array
+        // Convertir el mapa a un array con solo rangos que tengan películas
         var ratingsArray = [];
-        for (var m = 0; m < ratingRanges.length; m++) {
-            var label = ratingRanges[m].label;
-            var movies = moviesByRating.get(label);
+        ratingRanges.forEach(range => {
+            var movies = moviesByRating.get(range.label);
             if (movies.length > 0) {
                 ratingsArray.push({
-                    label: label,
+                    label: range.label,
                     count: movies.length,
                     movies: movies,
-                    min: ratingRanges[m].min,
-                    max: ratingRanges[m].max
+                    min: range.min,
+                    max: range.max
                 });
             }
-        }
-
-        // Ordenar por mejor calificación primero
-        ratingsArray.sort((a, b) => parseFloat(b.label) - parseFloat(a.label));
+        });
 
         return ratingsArray;
     }
@@ -194,109 +170,119 @@ FocusScope {
         }
 
         // Diseño de la UI
-        Row {
+        RowLayout {
             anchors.fill: parent
             spacing: 10
 
-            ListView {
-                id: ratingsListView
-                width: parent.width * 0.10
-                height: parent.height * 0.90
-                model: ratingListModel
-                currentIndex: 0
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: 2 // Espaciado más compacto, como en la imagen
+            Item {
+                Layout.preferredWidth: parent.width * 0.10
+                Layout.fillHeight: true
 
-                delegate: Rectangle {
-                    id: ratingDelegate
-                    width: ratingsListView.width //- 20
-                    height: 60 // Altura más compacta como en la imagen
-                    color: ListView.isCurrentItem && ratingsListView.focus ? "#006dc7" : "transparent"
-                    radius: 5 // Sin bordes redondeados
+                ListView {
+                    id: ratingsListView
+                    width: parent.width
+                    height: contentHeight
+                    anchors.centerIn: parent
+
+                    model: ratingListModel
+                    currentIndex: 0
+                    spacing: 15
+
+                    delegate: Rectangle {
+                        id: ratingDelegate
+                        width: ratingsListView.width //- 20
+                        height: 60 // Altura más compacta como en la imagen
+                        color: ListView.isCurrentItem && ratingsListView.focus ? "#006dc7" : "transparent"
+                        radius: 5 // Sin bordes redondeados
 
 
-                    Row {
-                        anchors {
-                            verticalCenter: parent.verticalCenter
-                            left: parent.left
-                            leftMargin: 10
-                        }
-                        spacing: 4
+                        Row {
+                            anchors {
+                                verticalCenter: parent.verticalCenter
+                                left: parent.left
+                                leftMargin: 10
+                            }
+                            spacing: 4
 
-                        Text {
-                            text: "★" // Estrella
-                            color: "#ffcc00" // Color amarillo/dorado para la estrella
-                            font {
-                                family: global.fonts.sans
-                                pixelSize: ratingList.menuFontSize
-                                bold: true
+                            Text {
+                                text: "★" // Estrella
+                                color: "#ffcc00" // Color amarillo/dorado para la estrella
+                                font {
+                                    family: global.fonts.sans
+                                    pixelSize: ratingList.menuFontSize
+                                    bold: true
+                                }
+
+                                anchors.verticalCenter: parent.verticalCenter
                             }
 
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-
-                        Text {
-                            text: model.label // Muestra el label
-                            color: "white"
-                            font {
-                                family: global.fonts.sans
-                                pixelSize: ratingList.menuFontSize
-                                bold: true
+                            Text {
+                                text: model.label // Muestra el label
+                                color: "white"
+                                font {
+                                    family: global.fonts.sans
+                                    pixelSize: ratingList.menuFontSize
+                                    bold: true
+                                }
+                                anchors.verticalCenter: parent.verticalCenter
                             }
-                            anchors.verticalCenter: parent.verticalCenter
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                ratingsListView.currentIndex = index;
+                                setFilterForRating(model.min, model.max, model.label);
+                            }
                         }
                     }
 
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            ratingsListView.currentIndex = index;
-                            setFilterForRating(model.min, model.max, model.label);
+                    // Manejar la navegación con las teclas de dirección y la tecla "Cancel"
+                    Keys.onPressed: {
+                        if (event.key === Qt.Key_Up) {
+                            event.accepted = true;
+                            if (ratingsListView.currentIndex > 0) {
+                                ratingsListView.currentIndex--;
+                                var item = ratingListModel.get(ratingsListView.currentIndex);
+                                setFilterForRating(item.min, item.max, item.label);
+                            }
+                        } else if (event.key === Qt.Key_Down) {
+                            event.accepted = true;
+                            if (ratingsListView.currentIndex < ratingListModel.count - 1) {
+                                ratingsListView.currentIndex++;
+                                var item = ratingListModel.get(ratingsListView.currentIndex);
+                                setFilterForRating(item.min, item.max, item.label);
+                            }
+                        } else if (event.key === Qt.Key_Right) {
+                            event.accepted = true;
+                            // Mover el foco al GridView
+                            moviesGridView.focus = true;
+                        } else if (api.keys.isCancel(event)) {
+                            event.accepted = true;
+                            // Reiniciar los filtros al salir
+                            if (ratingListModel.count > 0) {
+                                var firstItem = ratingListModel.get(0);
+                                setFilterForRating(firstItem.min, firstItem.max, firstItem.label);
+                            }
+
+                            // Llamar a la función para salir de RatingList
+                            Utils.hideRatingList();
                         }
                     }
+
+                    // Asegurarse de que el ListView tenga el foco al entrar
+                    focus: true
                 }
-
-                // Manejar la navegación con las teclas de dirección y la tecla "Cancel"
-                Keys.onPressed: {
-                    if (event.key === Qt.Key_Up) {
-                        event.accepted = true;
-                        if (ratingsListView.currentIndex > 0) {
-                            ratingsListView.currentIndex--;
-                            var item = ratingListModel.get(ratingsListView.currentIndex);
-                            setFilterForRating(item.min, item.max, item.label);
-                        }
-                    } else if (event.key === Qt.Key_Down) {
-                        event.accepted = true;
-                        if (ratingsListView.currentIndex < ratingListModel.count - 1) {
-                            ratingsListView.currentIndex++;
-                            var item = ratingListModel.get(ratingsListView.currentIndex);
-                            setFilterForRating(item.min, item.max, item.label);
-                        }
-                    } else if (event.key === Qt.Key_Right) {
-                        event.accepted = true;
-                        // Mover el foco al GridView
-                        moviesGridView.focus = true;
-                    } else if (api.keys.isCancel(event)) {
-                        event.accepted = true;
-                        // Reiniciar los filtros al salir
-                        if (ratingListModel.count > 0) {
-                            var firstItem = ratingListModel.get(0);
-                            setFilterForRating(firstItem.min, firstItem.max, firstItem.label);
-                        }
-
-                        // Llamar a la función para salir de RatingList
-                        Utils.hideRatingList();
-                    }
-                }
-
-                // Asegurarse de que el ListView tenga el foco al entrar
-                focus: true
             }
 
-            GridView {
+            /*GridView {
                 id: moviesGridView
                 width: parent.width - ratingsListView.width - 20
-                height: parent.height
+                height: parent.height*/
+            GridView {
+                id: moviesGridView
+                Layout.fillWidth: true
+                Layout.fillHeight: true
                 cellWidth: width / 4  // 4 columnas
                 cellHeight: height / 2 // 2 filas
                 clip: true // Para evitar que los elementos se salgan del área visible
@@ -463,6 +449,7 @@ FocusScope {
                 // Asegurarse de que el GridView tenga el foco al entrar desde el ListView
                 focus: false
             }
+
         }
 
         Component.onCompleted: {
