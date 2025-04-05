@@ -5,7 +5,7 @@ Una interfaz visual inspirada en elementos de **TMDB** y **Kodi**, diseñada par
 ### Importante antes de usar
 
 - Este tema está **diseñado exclusivamente** para la colección con el identificador **`shortName: movies`**.  
-  > ⚠️ No es completamente compatible con colecciones de juegos.
+  > ⚠️ No es compatible con colecciones de juegos.
 
 - Puedes obtener los metadatos de tus películas utilizando la herramienta:  
   👉 [PMDB-Scraper](https://github.com/ZagonAb/PMDB-Scraper)
