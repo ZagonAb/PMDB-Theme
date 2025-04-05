@@ -305,3 +305,50 @@ function updateBackground() {
     }
 }
 
+// utils.js - Añadir esta función
+function highlightSearchText(fullText, searchTerm) {
+    if (!fullText || !searchTerm || searchTerm.length === 0) {
+        return fullText; // Devuelve el texto original si no hay término de búsqueda
+    }
+
+    var lowerFullText = fullText.toLowerCase();
+    var lowerSearchTerm = searchTerm.toLowerCase();
+    var result = "";
+    var lastIndex = 0;
+    var index = lowerFullText.indexOf(lowerSearchTerm);
+
+    while (index >= 0) {
+        // Añadir la parte antes de la coincidencia
+        result += fullText.substring(lastIndex, index);
+
+        // Añadir la parte coincidente con formato de resaltado
+        result += "<font color='#ff6600'>" + fullText.substring(index, index + searchTerm.length) + "</font>";
+
+        lastIndex = index + searchTerm.length;
+        index = lowerFullText.indexOf(lowerSearchTerm, lastIndex);
+    }
+
+    // Añadir el resto del texto después de la última coincidencia
+    result += fullText.substring(lastIndex);
+
+    return result;
+}
+
+// Función genérica para resetear cualquier GridView
+function resetGridView(gridView) {
+    if (!gridView) return;
+
+    try {
+        gridView.currentIndex = 0;
+        if (gridView.contentY !== undefined) {
+            gridView.contentY = 0;
+        }
+        if (gridView.updateScrollBar !== undefined) {
+            gridView.updateScrollBar();
+        }
+    } catch (e) {
+        console.log("Error al resetear GridView:", e);
+    }
+}
+
+
