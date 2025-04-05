@@ -4,7 +4,7 @@ Una interfaz visual inspirada en elementos de **TMDB** y **Kodi**, diseñada par
 
 ### Importante antes de usar
 
-- Este tema está **diseñado exclusivamente** para la colección con el identificador `**shortName: movie**`.  
+- Este tema está **diseñado exclusivamente** para la colección con el identificador **`shortName: movie`**.  
   > ⚠️ No es compatible con colecciones de juegos.
 
 - Puedes obtener los metadatos de tus películas utilizando la herramienta:  
