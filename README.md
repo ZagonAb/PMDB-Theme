@@ -11,8 +11,7 @@ Una interfaz visual inspirada en elementos de **TMDB** y **Kodi**, diseñada par
   👉 [PMDB-Scraper](https://github.com/ZagonAb/PMDB-Scraper)
 
 - Para visualizar correctamente la barra de progreso en la sección **"Continue Playing"**, se recomienda usar el reproductor desarrollado específicamente para esta interfaz:  
-  🎬 [PMDB-Media-Player](https://github.com/ZagonAb/tmdb-videoplayer)  
-  Aunque, si lo prefieres, puedes utilizar otro reproductor a tu elección.
+  🎬 [PMDB-Media-Player](https://github.com/ZagonAb/tmdb-videoplayer) aunque si lo prefieres, puedes utilizar otro reproductor a tu elección.
 
 ---
 
