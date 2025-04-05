@@ -1,7 +1,20 @@
+## PMDB-Theme
 
-## Pegasus-TMDB-Theme
+Una interfaz visual inspirada en elementos de **TMDB** y **Kodi**, diseñada para ofrecer una experiencia atractiva y ordenada al navegar por tus películas.
 
-- Un tema inspirado en pegasus la interfaz de kodi.
+### Importante antes de usar
+
+- Este tema está **diseñado exclusivamente** para la colección con el identificador `**shortName: movie**`.  
+  > ⚠️ No es compatible con colecciones de juegos.
+
+- Puedes obtener los metadatos de tus películas utilizando la herramienta:  
+  👉 [PMDB-Scraper](https://github.com/ZagonAb/PMDB-Scraper)
+
+- Para visualizar correctamente la barra de progreso en la sección **"Continue Playing"**, se recomienda usar el reproductor desarrollado específicamente para esta interfaz:  
+  🎬 [PMDB-Media-Player](https://github.com/ZagonAb/tmdb-videoplayer)  
+  Aunque, si lo prefieres, puedes utilizar otro reproductor a tu elección.
+
+---
 
 ## Capturas
 
