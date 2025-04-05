@@ -44,7 +44,7 @@ Rectangle {
 
         Image {
             id: titleIcon
-            source: "assets/icons/logo.svg"
+            source: "assets/icons/logo2.svg"
             width: leftMenu.titleIconSize
             height: leftMenu.titleIconSize
             anchors.verticalCenter: parent.verticalCenter
@@ -53,7 +53,7 @@ Rectangle {
         }
 
         Text {
-            text: "TMDB-THEME"
+            text: "PMDB-THEME"
             color: "white"
             font {
                 family: global.fonts.sans
@@ -166,109 +166,13 @@ Rectangle {
     onWidthChanged: updateSizes()
     onHeightChanged: updateSizes()
 
-    /*function handleMenuSelection(option) {
-        try {
-            switch (option) {
-                case "Movies":
-                    if (collectionsItem && collectionsItem.recentlyAddedMoviesModel) {
-                        gridViewMovies.currentModel = collectionsItem.recentlyAddedMoviesModel;
-                        gridViewMovies.isVisible = true;
-                        currentFocus = "gridView";
-                    }
-                    break;
-                case "Years":
-                    // Ocultar listviewContainer cuando se accede a YearList
-                    listviewContainer.visible = false;
-                    yearList.isVisible = true;
-
-                    // Nos aseguramos de resetear la selección
-                    yearList.selectedYear = -1;
-                    yearList.isExpanded = false;
-
-                    // Actualizamos la lista de años (opcional, puede que ya esté actualizada)
-                    yearList.updateYearsList();
-
-                    // Damos el foco a la lista de años
-                    currentFocus = "yearList";
-                    yearList.focus = true; // Asegurar que YearList tenga el foco
-                    break;
-                case "Rating":
-                    // Ocultar listviewContainer cuando se accede a RatingList
-                    listviewContainer.visible = false;
-                    ratingList.isVisible = true;
-
-                    // Nos aseguramos de resetear la selección
-                    ratingList.selectedRatingRange = "";
-                    ratingList.isExpanded = false;
-
-                    // Actualizamos la lista de calificaciones
-                    ratingList.updateRatingsList();
-
-                    // Damos el foco a la lista de calificaciones
-                    currentFocus = "ratingList";
-                    ratingList.focus = true; // Asegurar que RatingList tenga el foco
-                    break;
-                case "Genres":
-                    // Ocultar listviewContainer cuando se accede a GenreList
-                    listviewContainer.visible = false;
-                    // Hacer visible la vista de géneros
-                    genreList.isVisible = true;
-                    genreList.visible = true;
-                    genreList.genereVisible = true;
-                    genreList.isExpanded = true;
-
-                    currentFocus = "genreList";
-                    genreList.focus = true;
-
-                    //genreListTimer.start();
-
-                    break;
-                case "Continue":
-                    if (collectionsItem && collectionsItem.continuePlayingMovies) {
-                        gridViewMovies.currentModel = collectionsItem.continuePlayingMovies;
-                        gridViewMovies.isVisible = true;
-                        currentFocus = "gridView";
-                    }
-                    break;
-                case "Favorites":
-                    if (collectionsItem && collectionsItem.favoriteMovies) {
-                        gridViewMovies.currentModel = collectionsItem.favoriteMovies;
-                        gridViewMovies.isVisible = true;
-                        currentFocus = "gridView";
-                    }
-                    break;
-                case "Titles":
-                    if (collectionsItem && collectionsItem.baseMoviesFilter) {
-                        gridViewTitles.currentModel = collectionsItem.baseMoviesFilter;
-                        gridViewTitles.isVisible = true;
-                        currentFocus = "gridViewTitles";
-                    }
-                    break;
-                default:
-                    gridViewMovies.isVisible = false;
-                    gridViewTitles.isVisible = false;
-                    currentFocus = "menu";
-                    currentMovie = Utils.resetBackground(backgroundImage, overlayImage);
-                    break;
-            }
-        } catch (e) {
-            console.log("Error al manejar la selección del menú: " + e);
-            // Retorno seguro al menú principal en caso de error
-            gridViewMovies.isVisible = false;
-            gridViewTitles.isVisible = false;
-            currentFocus = "menu";
-            backgroundImage.source = "";
-            overlayImage.opacity = 0.7;
-            currentMovie = null;
-        }
-    }*/
-
     function handleMenuSelection(option) {
         try {
             switch (option) {
                 case "Movies":
                     if (collectionsItem && collectionsItem.recentlyAddedMoviesModel) {
                         gridViewMovies.currentModel = collectionsItem.recentlyAddedMoviesModel;
+                        gridViewMovies.resetGridView();
                         gridViewMovies.isVisible = true;
                         currentFocus = "gridView";
                     }
@@ -303,6 +207,7 @@ Rectangle {
                 case "Continue":
                     if (collectionsItem && collectionsItem.continuePlayingMovies) {
                         gridViewMovies.currentModel = collectionsItem.continuePlayingMovies;
+                        gridViewMovies.resetGridView();
                         gridViewMovies.isVisible = true;
                         currentFocus = "gridView";
                     }
@@ -310,6 +215,7 @@ Rectangle {
                 case "Favorites":
                     if (collectionsItem && collectionsItem.favoriteMovies) {
                         gridViewMovies.currentModel = collectionsItem.favoriteMovies;
+                        gridViewMovies.resetGridView();
                         gridViewMovies.isVisible = true;
                         currentFocus = "gridView";
                     }
@@ -317,6 +223,7 @@ Rectangle {
                 case "Titles":
                     if (collectionsItem && collectionsItem.baseMoviesFilter) {
                         gridViewTitles.currentModel = collectionsItem.baseMoviesFilter;
+                        gridViewTitles.resetGridView();
                         gridViewTitles.isVisible = true;
                         currentFocus = "gridViewTitles";
                     }

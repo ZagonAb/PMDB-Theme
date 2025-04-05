@@ -1,8 +1,3 @@
-// MovieDetails.qml
-/*import QtQuick 2.15
-import QtGraphicalEffects 1.15
-import "utils.js" as Utils*/
-
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Window 2.15
@@ -50,18 +45,35 @@ FocusScope {
         id: overlay
         anchors.fill: parent
         color: "#022441"
-        opacity: 0.5
+        opacity: 0.8
     }
 
     Rectangle {
         id: videoOverlay
         anchors.fill: parent
 
-        color: "#000a12"
-        opacity: mediaPlayer.visible ? 0.9 : 0.0
+        color: "#000000"
+        opacity: mediaPlayer.visible ? 1 : 0.0
         z: 1001
         Behavior on opacity { NumberAnimation { duration: 200 } }
         visible: opacity > 0
+
+        RadialGradient {
+            anchors.fill: parent
+            gradient: Gradient {
+
+
+                GradientStop { position: 0.5; color: Qt.rgba(0.02, 0.36, 0.77, 0.3) } // Color claro en el centro
+                GradientStop { position: 0.8; color: Qt.rgba(0.02, 0.36, 0.77, 0.1) } // Transición suave
+                GradientStop { position: 1.0; color: "#000000" }
+
+                 // Transparente en los bordes
+            }
+            horizontalRadius: parent.width * 0.5
+            verticalRadius: parent.height * 0.7
+            source: videoOverlay
+            visible: mediaPlayer.visible
+        }
 
         // Contenedor principal para todos los elementos durante la reproducción
         Item {
@@ -345,7 +357,7 @@ FocusScope {
                                     id: btnLaunch
                                     width: parent.width
                                     height: 46 * rectangleitem.scaleRatio // Escalar altura
-                                    color: btnLaunch.activeFocus ? "#006dc7" : "#022441"
+                                    color: btnLaunch.activeFocus ? "#006dc7" : "#044173"
                                     radius: 6 * rectangleitem.scaleRatio // Escalar radio
                                     border.width: btnLaunch.activeFocus ? 2 : 0
                                     border.color: "white"
@@ -418,7 +430,7 @@ FocusScope {
                                     id: btnFavorite
                                     width: parent.width
                                     height: 46 * rectangleitem.scaleRatio // Escalar altura
-                                    color: btnFavorite.activeFocus ? "#006dc7" : "#022441"
+                                    color: btnFavorite.activeFocus ? "#006dc7" : "#044173"
                                     radius: 6 * rectangleitem.scaleRatio // Escalar radio
                                     border.width: btnFavorite.activeFocus ? 2 : 0
                                     border.color: "white"
@@ -498,7 +510,7 @@ FocusScope {
                                     id: btnPlayTrailer
                                     width: parent.width
                                     height: 46 * rectangleitem.scaleRatio // Escalar altura
-                                    color: btnPlayTrailer.activeFocus ? "#006dc7" : "#022441"
+                                    color: btnPlayTrailer.activeFocus ? "#006dc7" : "#044173"
                                     radius: 6 * rectangleitem.scaleRatio // Escalar radio
                                     border.width: btnPlayTrailer.activeFocus ? 2 : 0
                                     border.color: "white"
@@ -526,7 +538,9 @@ FocusScope {
                                         } else if (api.keys.isCancel(event)) {
                                             event.accepted = true;
                                             Utils.hideDetails(movieDetailsRoot);
-                                            if (previousFocus === "gridView") {
+                                            if (previousFocus === "search") {
+                                                searchMovie.restoreFocus();
+                                            } else if (previousFocus === "gridView") {
                                                 gridViewMovies.visible = true;
                                                 gridViewMovies.focus = true;
                                             } else if (previousFocus === "gridViewTitles") {

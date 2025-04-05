@@ -90,11 +90,6 @@ FocusScope {
         isVisible: false
     }
 
-    /*MovieDetails {
-     *       id: movieDetails
-     *       anchors.fill: parent
-}*/
-
     // Modifica MovieDetails para usar el reproductor global
     MovieDetails {
         id: movieDetails
@@ -168,6 +163,7 @@ FocusScope {
                 if (currentFocus === "search") {
                     searchMovie.clearAndHide()
                 } else if  (currentFocus === "gridViewTitles") {
+                    gridViewMovies.resetGridView();
                     gridViewTitles.hideGrid();
                 } else if (currentFocus === "yearList") {
                     // Manejo de retroceso desde yearList

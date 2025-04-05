@@ -27,6 +27,10 @@ FocusScope {
         scrollBar.visible = true;
     }
 
+    function resetGridView() {
+        Utils.resetGridView(gridView);
+    }
+
     Connections {
         target: gridView
         function onContentYChanged() { updateScrollBar(); }

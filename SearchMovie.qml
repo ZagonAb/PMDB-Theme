@@ -17,6 +17,7 @@ Item {
     property bool isVisible: false
     property var searchResults: []
     property string currentSearchTerm: ""
+    property int lastFocusedIndex: 0
 
     // Modelo para los resultados de búsqueda
     ListModel {
@@ -33,10 +34,11 @@ Item {
             topMargin: 20
             horizontalCenter: parent.horizontalCenter
         }
-        color: "#333333"
+        color: "#022441"
         radius: 5
-        border.color: searchBar.focus ? "#1E90FF" : "#555555"
+        border.color: searchBar.focus ? "#1E90FF" : "#1E90FF"
         border.width: 2
+        opacity: 0.5
 
         TextInput {
             id: searchInput
@@ -98,7 +100,7 @@ Item {
     Rectangle {
         id: gridContainer
         width: parent.width * 0.95
-        height: parent.height * 0.4 // 40% del alto
+        height: parent.height * 0.5 // 40% del alto
         anchors {
             bottom: parent.bottom
             bottomMargin: parent.height * 0.1 // 10% de margen inferior
@@ -109,7 +111,7 @@ Item {
         GridView {
             id: resultsGrid
             anchors.fill: parent
-            cellWidth: width / 5 // Mostrar 5 elementos por fila
+            cellWidth: width / 4 // Mostrar 5 elementos por fila
             cellHeight: height // Una sola fila, altura completa del contenedor
             clip: true
             model: searchResultsModel
@@ -135,11 +137,12 @@ Item {
                         Image {
                             id: posterImage
                             anchors.fill: parent
-                            source: model.assets.boxFront
-                            fillMode: Image.PreserveAspectCrop
-                            asynchronous: true
+                            source: model.assets ? model.assets.boxFront : ""
+                            fillMode: Image.Stretch //PreserveAspectCrop
                             mipmap: true
+                            asynchronous: true
                             cache: true
+                            sourceSize { width: 200; height: 300 }
                         }
 
                         Rectangle {
@@ -151,18 +154,20 @@ Item {
                         }
                     }
 
-                    // Título (sin borde de selección)
                     Text {
-                        text: model.title || ""
+                        id: movieTitle
+                        text: model.title ? Utils.highlightSearchText(model.title, currentSearchTerm) : ""
                         width: parent.width
                         height: 30
                         horizontalAlignment: Text.AlignHCenter
                         color: "white"
                         font {
                             family: global.fonts.sans
-                            pixelSize: 16
+                            pixelSize: 12
                         }
                         elide: Text.ElideRight
+                        wrapMode: Text.WordWrap
+                        textFormat: Text.RichText // Añadir esto para interpretar el HTML
                     }
                 }
             }
@@ -181,7 +186,12 @@ Item {
                 if (api.keys.isAccept(event)) {
                     event.accepted = true
                     if (resultsGrid.currentIndex >= 0) {
-                        launchMovie(searchResultsModel.get(resultsGrid.currentIndex))
+                        // Guardar el índice actual antes de abrir detalles
+                        lastFocusedIndex = currentIndex
+
+                        // Mostrar detalles de la película seleccionada
+                        var selectedMovie = searchResultsModel.get(currentIndex)
+                        Utils.showDetails(movieDetails, selectedMovie, "search")
                     }
                 }
                 else if (api.keys.isCancel(event)) {
@@ -240,6 +250,15 @@ Item {
         visible: searchResultsModel.count === 0 && currentSearchTerm.length === 0
     }
 
+    // Función para restaurar el foco después de volver de MovieDetails
+    function restoreFocus() {
+        if (isVisible) {
+            resultsGrid.focus = true
+            resultsGrid.currentIndex = lastFocusedIndex
+            Utils.updateBackground()
+        }
+    }
+
     function performSearch(term) {
         searchResultsModel.clear()
         if (term.length === 0) {
@@ -258,13 +277,6 @@ Item {
                 }
                 break
             }
-        }
-    }
-
-    function launchMovie(movie) {
-        if (movie) {
-            movie.launch()
-            clearAndHide()
         }
     }
 

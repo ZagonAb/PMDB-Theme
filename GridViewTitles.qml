@@ -37,6 +37,10 @@ FocusScope {
         gridViewTitlesRoot.visible = false;
     }
 
+    function resetGridView() {
+        Utils.resetGridView(gridView);
+    }
+
     // Manejar cambios de visibilidad
     onIsVisibleChanged: {
         if (isVisible) {

@@ -7,6 +7,8 @@ FocusScope {
     id: mediaPlayerComponent
     property real playerWidth:  parent.width * 0.6
     property real playerHeight: parent.height * 0.6
+    // En MediaPlayerComponent.qml, añade:
+    property color dominantColor: "#003366" // Color predeterminado
     anchors.centerIn: parent
     visible: false
     z: 2001 // Mayor que el overlay oscuro
@@ -125,34 +127,9 @@ FocusScope {
             }
         }
 
-        // Botón de cerrar en la esquina superior derecha
-        /*Image {
-            source: "assets/icons/close.svg"
-            width: 32
-            height: 32
-            mipmap: true
-            anchors {
-                top: parent.top
-                right: parent.right
-                margins: 20
-            }
-            opacity: showControls ? 1 : 0
-            visible: opacity > 0
-
-            Behavior on opacity {
-                NumberAnimation { duration: 200 }
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: mediaPlayerComponent.stopVideo() // Solo cierra el reproductor
-            }
-        }*/
-
-        // Contenedor de controles
         Rectangle {
             id: controlsContainer
-            height: 100
+            height: playerHeight * 0.15 // 15% de la altura del reproductor
             color: Qt.rgba(0, 0, 0, 0.7)
             anchors {
                 left: parent.left
@@ -161,7 +138,6 @@ FocusScope {
             }
             opacity: showControls ? 1 : 0
             visible: opacity > 0
-
             radius: 40
 
             Behavior on opacity {
@@ -171,33 +147,36 @@ FocusScope {
             // Barra de progreso
             Rectangle {
                 id: progressBar
-                height: 8
+                height: playerHeight * 0.015 // 0.8% de la altura del reproductor
                 color: "#444444"
                 anchors {
                     left: parent.left
                     right: parent.right
+                    leftMargin: playerWidth * 0.15  // 10% de margen izquierdo
+                    rightMargin: playerWidth * 0.15 // 10% de margen derecho
                     bottom: controlsRow.top
-                    margins: 20
+                    margins: playerHeight * 0.03 // 2% de la altura del reproductor
                 }
-                radius: 5
+
+                radius: height / 2
 
                 Rectangle {
                     id: progressIndicator
                     width: mediaPlayer.duration > 0 ? (mediaPlayer.position / mediaPlayer.duration) * parent.width : 0
                     height: parent.height
                     color: "#022441"
-                    radius: 3
+                    radius: height / 2
                 }
 
                 Rectangle {
                     id: progressHandle
-                    width: 15
-                    height: 15
-                    radius: 6
+                    width: playerHeight * 0.030 // 1.5% de la altura del reproductor
+                    height: width
+                    radius: width / 2
                     color: "#022441"
                     anchors.verticalCenter: parent.verticalCenter
                     x: mediaPlayer.duration > 0 ? (mediaPlayer.position / mediaPlayer.duration) * (parent.width - width) : 0
-                    visible: true //progressBarArea.containsMouse || progressBarArea.pressed
+                    visible: true
                 }
 
                 MouseArea {
@@ -216,18 +195,18 @@ FocusScope {
             // Controles principales
             Row {
                 id: controlsRow
-                spacing: 20
+                spacing: playerWidth * 0.02 // 2% del ancho del reproductor
                 anchors {
                     bottom: parent.bottom
                     horizontalCenter: parent.horizontalCenter
-                    margins: 20
+                    margins: playerHeight * 0.02 // 2% de la altura del reproductor
                 }
 
                 // Botón retroceder 10s
                 Image {
                     source: "assets/icons/replay.svg"
-                    width: 32
-                    height: 32
+                    width: playerHeight * 0.052 // 3.2% de la altura del reproductor
+                    height: width
                     MouseArea {
                         anchors.fill: parent
                         onClicked: mediaPlayer.seek(mediaPlayer.position - 10000)
@@ -240,8 +219,8 @@ FocusScope {
                     source: mediaPlayer.playbackState === MediaPlayer.PlayingState
                     ? "assets/icons/pause.svg"
                     : "assets/icons/play.svg"
-                    width: 32
-                    height: 32
+                    width: playerHeight * 0.052
+                    height: width
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
@@ -258,11 +237,11 @@ FocusScope {
                 // Botón de stop
                 Image {
                     source: "assets/icons/close.svg"
-                    width: 32
-                    height: 32
+                    width: playerHeight * 0.052
+                    height: width
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: mediaPlayerComponent.stopVideo() // Solo cierra el reproductor
+                        onClicked: mediaPlayerComponent.stopVideo()
                     }
                     mipmap: true
                 }
@@ -270,8 +249,8 @@ FocusScope {
                 // Botón adelantar 10s
                 Image {
                     source: "assets/icons/forward.svg"
-                    width: 32
-                    height: 32
+                    width: playerHeight * 0.052
+                    height: width
                     MouseArea {
                         anchors.fill: parent
                         onClicked: mediaPlayer.seek(mediaPlayer.position + 10000)
@@ -283,19 +262,19 @@ FocusScope {
             // Control de volumen personalizado
             Item {
                 id: volumeControl
-                width: 120
-                height: 24
+                width: playerWidth * 0.12 // 12% del ancho del reproductor
+                height: playerHeight * 0.024 // 2.4% de la altura del reproductor
                 anchors {
                     right: timeText.left
                     bottom: parent.bottom
-                    margins: 20
+                    margins: playerHeight * 0.05
                 }
 
                 Image {
                     id: volumeIcon
                     source: isMuted ? "assets/icons/mute.svg" : "assets/icons/volume.svg"
-                    width: 24
-                    height: 24
+                    width: playerHeight * 0.054
+                    height: width
                     mipmap: true
                     MouseArea {
                         anchors.fill: parent
@@ -306,13 +285,13 @@ FocusScope {
                 Rectangle {
                     id: volumeSlider
                     property real value: 1.0
-                    height: 6
-                    width: 80
+                    height: playerHeight * 0.015 // 0.6% de la altura del reproductor
+                    width: playerWidth * 0.12 // 8% del ancho del reproductor
                     color: "#444444"
-                    radius: 2
+                    radius: height / 2
                     anchors {
                         left: volumeIcon.right
-                        leftMargin: 10
+                        leftMargin: playerWidth * 0.01 // 1% del ancho del reproductor
                         verticalCenter: volumeIcon.verticalCenter
                     }
 
@@ -320,18 +299,18 @@ FocusScope {
                         width: parent.width * parent.value
                         height: parent.height
                         color: "#022441"
-                        radius: 2
+                        radius: height / 2
                     }
 
                     Rectangle {
                         id: volumeHandle
-                        width: 12
-                        height: 12
-                        radius: 6
+                        width: playerHeight * 0.030 // 1.2% de la altura del reproductor
+                        height: width
+                        radius: width / 2
                         color: "#022441"
                         x: (parent.width - width) * parent.value
                         anchors.verticalCenter: parent.verticalCenter
-                        visible: true //volumeArea.containsMouse || volumeArea.pressed
+                        visible: true
                     }
 
                     MouseArea {
@@ -358,11 +337,11 @@ FocusScope {
                 anchors {
                     right: parent.right
                     bottom: parent.bottom
-                    margins: 20
+                    margins: playerHeight * 0.092
                 }
                 color: "white"
                 text: formatTime(mediaPlayer.position) + " / " + formatTime(mediaPlayer.duration)
-                font.pixelSize: 14
+                font.pixelSize: playerHeight * 0.024 // 1.4% de la altura del reproductor
             }
         }
 
@@ -370,11 +349,10 @@ FocusScope {
             id: videoBorder
             anchors.fill: parent
             color: "transparent"
-            border.color: "#022441"
+            border.color: "#033761"
             border.width: 6
             radius: 40
-            // No necesitaríamos un z muy alto aquí, ya que el orden de declaración
-            // garantiza que se dibuje encima
+
         }
 
 

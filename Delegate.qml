@@ -147,6 +147,16 @@ Component {
                 if (game) {
                     launchTimer.start();
                 }
+            } else if (api.keys.isCancel(event)) {
+                event.accepted = true;
+                // Limpiar la imagen de fondo
+                backgroundImage.source = "";
+                currentMovie = null;
+                // Restaurar opacidad del overlay
+                overlayImage.opacity = 0.7;
+                // Cambiar el foco al menú
+                currentFocus = "menu";
+                leftMenu.menuList.focus = true;
             }
         }
 
