@@ -27,14 +27,10 @@ Component {
         property bool isFocused: ListView.isCurrentItem && ListView.view.focus
         property var game: modelData
         property var cachedData: null
-
-        // Propiedades responsivas para elementos internos
         property real borderWidth: Math.max(2, 4 * listviewContainer.scaleFactor)
         property real titlePanelHeight: Math.min(60, 50 * listviewContainer.scaleFactor)
         property real titleFontSize: Math.min(16, 14 * listviewContainer.scaleFactor)
         property real loadingSpinnerSize: Math.min(50, 40 * listviewContainer.scaleFactor)
-
-        // Escala cuando está enfocado
         scale: isFocused ? 1.01 : 1.0
 
         Behavior on scale {
@@ -51,7 +47,6 @@ Component {
             }
         }
 
-        // Sombra cuando está enfocado
         Rectangle {
             id: shadow
             anchors.fill: parent
@@ -63,7 +58,6 @@ Component {
             z: 100
         }
 
-        // Contenedor del poster con bordes redondeados
         Rectangle {
             id: posterContainer
             anchors.fill: parent
@@ -136,7 +130,6 @@ Component {
                 }
             }
 
-            // Mostrar título mientras carga
             Text {
                 anchors {
                     bottom: parent.bottom
@@ -164,12 +157,9 @@ Component {
                 }
             } else if (api.keys.isCancel(event)) {
                 event.accepted = true;
-                // Limpiar la imagen de fondo
                 backgroundImage.source = "";
                 currentMovie = null;
-                // Restaurar opacidad del overlay
                 overlayImage.opacity = 0.7;
-                // Cambiar el foco al menú
                 currentFocus = "menu";
                 leftMenu.menuList.focus = true;
             }

@@ -37,30 +37,15 @@ Component {
 
         Component.onCompleted: {
             if (game) {
-                // Depuración - mostrar todas las propiedades extra disponibles
-                //console.log("Título película:", game.title);
-                //console.log("Propiedades extra disponibles:", JSON.stringify(game.extra));
-
-                // Verificar específicamente Duration y playTime
                 var durationValue = game.extra ? game.extra["duration"] || game.extra["duration"] : null;
-                //console.log("Duration value:", durationValue);
-
-                // Obtener el tiempo de reproducción desde el archivo JSON
                 var watchedTime = Utils.getLastPosition(game.title) / 1000; // Convertir a segundos
-                //console.log("Tiempo reproducido en segundos:", watchedTime);
-
-                // Calculate progress percentage based on watchedTime and Duration
                 var totalDuration = 0;
                 if (durationValue) {
-                    totalDuration = parseInt(durationValue) * 60; // Convert minutes to seconds
-                    //console.log("Total duration en segundos:", totalDuration);
+                    totalDuration = parseInt(durationValue) * 60;
                 } else {
-                    //console.log("¡ADVERTENCIA! No se encontró Duration en los datos extra");
+                    //console.log("ADVERTENCIA! No hay depuración);
                 }
-
-                // Ensure we don't exceed 100% progress
                 progressPercentage = totalDuration > 0 ? Math.min(watchedTime / totalDuration, 1.0) : 0;
-                //console.log("Porcentaje de progreso calculado:", progressPercentage);
 
                 cachedData = {
                     title: game.title || "",
@@ -79,12 +64,11 @@ Component {
             anchors.margins: -borderWidth
             color: "transparent"
             border.color: "#006dc7"
-            border.width: delegateRoot.isFocused ? 4 : 0
+            border.width: delegateRoot.isFocused ? borderWidth : 0
             visible: delegateRoot.isFocused
             z: 100
         }
 
-        // Contenedor del poster con bordes redondeados
         Rectangle {
             id: posterContainer
             anchors.fill: parent
@@ -110,15 +94,13 @@ Component {
             }
         }
 
-        // Efecto de oscurecimiento sobre la imagen de fondo
         Rectangle {
             id: darkenOverlay
             anchors.fill: parent
-            color: "#80000000"  // Color negro con 50% de opacidad
+            color: "#80000000"
             visible: poster.status === Image.Ready
         }
 
-        // Imagen "continue.svg" centrada
         Image {
             id: continueIcon
             anchors.centerIn: parent
@@ -129,21 +111,19 @@ Component {
             mipmap: true
         }
 
-        // Progress bar container - Fuera del recuadro de la imagen
         Rectangle {
             id: progressBarContainer
             anchors {
                 left: parent.left
                 right: parent.right
                 top: parent.bottom
-                topMargin: 10  // Ajusta este valor para la distancia deseada
+                topMargin: 10
             }
-            height: 6  // Incrementado para mejor visibilidad
-            color: "#33ffffff" // Semi-transparent white
-            visible: true      // Siempre visible para depuración
-            z: 200            // Asegurar que esté encima de otros elementos
+            height: 6
+            color: "#33ffffff"
+            visible: true
+            z: 200
 
-            // Progress bar fill
             Rectangle {
                 id: progressBarFill
                 anchors {
@@ -152,7 +132,7 @@ Component {
                     bottom: parent.bottom
                 }
                 width: parent.width * progressPercentage
-                color: "#006dc7" // Green color
+                color: "#006dc7"
             }
         }
 
@@ -206,6 +186,13 @@ Component {
                 if (game) {
                     launchTimer.start();
                 }
+            } else if (api.keys.isCancel(event)) {
+                event.accepted = true;
+                backgroundImage.source = "";
+                currentMovie = null;
+                overlayImage.opacity = 0.7;
+                currentFocus = "menu";
+                leftMenu.menuList.focus = true;
             }
         }
 

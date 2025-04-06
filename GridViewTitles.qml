@@ -34,20 +34,14 @@ FocusScope {
     property bool hasFocus: false
     property var currentMovie: null
 
-    // Función para ocultar el gridview
     function hideGrid() {
         isVisible = false;
         hasFocus = false;
-
-        // Limpia la imagen de fondo explícitamente
         backgroundImage.source = "";
         currentMovie = null;
-
-        // Asegúrate de que el overlay tenga la opacidad correcta
         overlayImage.opacity = 0.7;
-
         currentFocus = "menu";
-        leftMenu.menuList.focus = true;
+        Utils.setMenuFocus();
         listviewContainer.visible = true;
         gridViewTitlesRoot.visible = false;
     }
@@ -56,7 +50,6 @@ FocusScope {
         Utils.resetGridView(gridView);
     }
 
-    // Manejar cambios de visibilidad
     onIsVisibleChanged: {
         if (isVisible) {
             listviewContainer.visible = false;
@@ -72,20 +65,16 @@ FocusScope {
         }
     }
 
-    // GridView con exactamente 2 columnas
     GridView {
         id: gridView
         anchors.fill: parent
-
-        // Exactamente 2 columnas siempre
-        cellWidth: width / 2  // Siempre divide el ancho en 2
-        cellHeight: cellWidth * 0.43  // Mantiene proporción 2:1
+        cellWidth: width / 2
+        cellHeight: cellWidth * 0.43
 
         model: currentModel
         delegate: gridDelegate
         focus: hasFocus
 
-        // Cambiar el foco cuando se selecciona un elemento
         onCurrentIndexChanged: {
             if (currentIndex >= 0) {
                 currentMovie = currentModel.get(currentIndex);
@@ -93,7 +82,6 @@ FocusScope {
             }
         }
 
-        // Manejo de teclas
         Keys.onLeftPressed: moveCurrentIndexLeft()
         Keys.onRightPressed: moveCurrentIndexRight()
         Keys.onUpPressed: moveCurrentIndexUp()
@@ -102,18 +90,17 @@ FocusScope {
         Keys.onPressed: {
             if (api.keys.isCancel(event)) {
                 event.accepted = true;
-                hideGrid();  // Ocultar el gridview al presionar "Cancelar"
+                hideGrid();
             } else if (api.keys.isAccept(event)) {
                 event.accepted = true;
                 if (currentIndex >= 0) {
-                    Utils.showDetails(movieDetails, currentModel.get(currentIndex), "gridViewTitles"); // Pasar "gridViewTitles" como previousFocus
-                    gridViewTitlesRoot.visible = false; // Ocultar el grid al mostrar los detalles
+                    Utils.showDetails(movieDetails, currentModel.get(currentIndex), "gridViewTitles");
+                    gridViewTitlesRoot.visible = false;
                 }
             }
         }
     }
 
-    // Delegate para cada tarjeta de juego
     Component {
         id: gridDelegate
 
@@ -121,23 +108,20 @@ FocusScope {
             width: gridView.cellWidth
             height: gridView.cellHeight
 
-            // Contenedor principal - Responsive
             Rectangle {
                 id: cardContainer
                 anchors.fill: parent
-                anchors.margins: parent.width * 0.02  // Margen proporcional
-                color: "#232323"  // Color de fondo de la tarjeta
-                radius: 5  // Bordes redondeados
+                anchors.margins: parent.width * 0.02
+                color: "#232323"
+                radius: 5
 
-                // Fila para la portada y los detalles - Responsive
                 Row {
                     anchors.fill: parent
                     anchors.margins: parent.width * 0.02
                     spacing: parent.width * 0.02
 
-                    // Portada del juego (BOXFRONT) - Responsive
                     Rectangle {
-                        width: parent.width * 0.3  // 30% del ancho
+                        width: parent.width * 0.3
                         height: parent.height
                         color: "transparent"
 
@@ -152,26 +136,23 @@ FocusScope {
                         }
                     }
 
-                    // Columna para los detalles del juego - Responsive
                     Column {
-                        width: parent.width * 0.68  // 68% del ancho restante
+                        width: parent.width * 0.68
                         height: parent.height
                         spacing: parent.height * 0.05
 
-                        // Título del juego - Responsive
                         Text {
                             text: modelData.title
                             color: "white"
                             font {
                                 family: global.fonts.sans
-                                pixelSize: Math.max(12, cardContainer.width * 0.03)  // Tamaño responsivo
+                                pixelSize: Math.max(12, cardContainer.width * 0.03)
                                 bold: true
                             }
                             elide: Text.ElideRight
                             width: parent.width
                         }
 
-                        // Detalles (año de lanzamiento, rating, género) - Responsive
                         Row {
                             spacing: 5
                             width: parent.width
@@ -181,7 +162,7 @@ FocusScope {
                                 color: "white"
                                 font {
                                     family: global.fonts.sans
-                                    pixelSize: Math.max(10, cardContainer.width * 0.025)  // Tamaño responsivo
+                                    pixelSize: Math.max(10, cardContainer.width * 0.025)
                                 }
                             }
                             Text {
@@ -220,12 +201,10 @@ FocusScope {
                             }
                         }
 
-                        // Solución para AutoScroll condicionado
                         Item {
                             width: parent.width
                             height: parent.height * 0.5
 
-                            // Texto estático (cuando no está seleccionado)
                             Text {
                                 id: staticDescription
                                 anchors.fill: parent
@@ -240,7 +219,6 @@ FocusScope {
                                 visible: gridView.currentIndex !== index
                             }
 
-                            // AutoScroll (solo visible cuando está seleccionado)
                             PegasusUtils.AutoScroll {
                                 anchors.fill: parent
                                 visible: gridView.currentIndex === index
@@ -258,7 +236,7 @@ FocusScope {
                                 }
                             }
                         }
-                        // Versión simplificada pero funcional
+
                         Text {
                             width: parent.width
                             height: Math.max(20, cardContainer.width * 0.04)
@@ -277,7 +255,6 @@ FocusScope {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    // Alternar entre vista completa y abreviada al hacer clic
                                     parent.text = (parent.elide === Text.ElideRight)
                                     ? Utils.formatVideoPath(modelData, true)
                                     : Utils.formatVideoPath(modelData);
@@ -293,7 +270,6 @@ FocusScope {
                     }
                 }
 
-                // Rectángulo de selección - Responsivo
                 Rectangle {
                     anchors.fill: parent
                     color: "transparent"

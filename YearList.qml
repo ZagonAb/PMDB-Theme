@@ -26,14 +26,12 @@ FocusScope {
     property bool isVisible: false
     property bool isExpanded: false
     property int selectedYear: -1
-
     property real scaleFactor: Math.min(width / 200, height / 800)
     property real menuFontSize: 28 * scaleFactor
 
     visible: isVisible
     focus: isVisible
 
-    // Función optimizada para filtrar películas por colección
     function filterMoviesByCollection(collectionName) {
         var filteredMovies = [];
         var allGamesCount = api.allGames.count;
@@ -52,7 +50,6 @@ FocusScope {
         return filteredMovies;
     }
 
-    // Función optimizada para agrupar películas por año
     function createCategoriesFromYears() {
         var moviesByYear = new Map();
         var count = baseMoviesFilter.count;
@@ -76,7 +73,6 @@ FocusScope {
         .sort((a, b) => b.year - a.year);
     }
 
-    // Función optimizada para actualizar la lista de años
     function updateYearsList() {
         yearsListModel.clear();
         var yearsData = createCategoriesFromYears();
@@ -118,7 +114,6 @@ FocusScope {
         }
         color: "transparent"
 
-        // Modelos optimizados
         ListModel {
             id: yearsListModel
         }
@@ -150,7 +145,6 @@ FocusScope {
             anchors.fill: parent
             spacing: 10
 
-            // ListView optimizado para años
             ListView {
                 id: yearsListView
                 width: parent.width * 0.10
@@ -159,7 +153,7 @@ FocusScope {
                 currentIndex: 0
                 anchors.verticalCenter: parent.verticalCenter
                 clip: true
-                cacheBuffer: height // Cache optimizado
+                cacheBuffer: Math.max(0, height)
 
                 delegate: Rectangle {
                     id: yearDelegate
@@ -190,22 +184,24 @@ FocusScope {
                     }
                 }
 
-                // Navegación optimizada
                 Keys.onUpPressed: {
                     if (currentIndex > 0) {
                         currentIndex--;
                         yearFilter.value = yearsListModel.get(currentIndex).year;
                     }
                 }
+
                 Keys.onDownPressed: {
                     if (currentIndex < yearsListModel.count - 1) {
                         currentIndex++;
                         yearFilter.value = yearsListModel.get(currentIndex).year;
                     }
                 }
+
                 Keys.onRightPressed: {
                     moviesGridView.focus = true;
                 }
+
                 Keys.onPressed: {
                     if (api.keys.isCancel(event)) {
                         event.accepted = true;
@@ -219,7 +215,6 @@ FocusScope {
                 focus: true
             }
 
-            // GridView optimizado para películas
             GridView {
                 id: moviesGridView
                 width: parent.width - yearsListView.width - 20
@@ -239,7 +234,6 @@ FocusScope {
                     width: moviesGridView.cellWidth
                     height: moviesGridView.cellHeight
 
-                    // Indicador de selección optimizado
                     Rectangle {
                         width: parent.width * 0.8
                         height: parent.height * 0.8
@@ -253,7 +247,6 @@ FocusScope {
                         z: 100
                     }
 
-                    // Contenido optimizado
                     Rectangle {
                         id: posterContainer
                         width: parent.width * 0.8
@@ -299,20 +292,16 @@ FocusScope {
                         wrapMode: Text.WordWrap
                         elide: Text.ElideRight
                         maximumLineCount: 2
+                        width: parent.width * 0.8
                         anchors {
                             top: posterContainer.bottom
                             topMargin: 6
                             horizontalCenter: parent.horizontalCenter
-                            left: parent.left
-                            leftMargin: parent.width * 0.1
-                            right: parent.right
-                            rightMargin: parent.width * 0.1
                         }
                         color: "white"
                     }
                 }
 
-                // Optimización de enfoque y background
                 onFocusChanged: {
                     if (focus && currentIndex >= 0 && count > 0) {
                         updateBackground();
@@ -327,7 +316,6 @@ FocusScope {
                     }
                 }
 
-                // Función para actualizar el fondo
                 function updateBackground() {
                     var selectedMovie = filteredMoviesByYear.get(currentIndex);
                     if (selectedMovie) {
@@ -336,7 +324,6 @@ FocusScope {
                     }
                 }
 
-                // Navegación optimizada
                 Keys.onLeftPressed: {
                     if (currentIndex % 4 === 0) {
                         yearsListView.focus = true;
@@ -345,9 +332,11 @@ FocusScope {
                         moveCurrentIndexLeft();
                     }
                 }
+
                 Keys.onRightPressed: moveCurrentIndexRight()
                 Keys.onUpPressed: moveCurrentIndexUp()
                 Keys.onDownPressed: moveCurrentIndexDown()
+
                 Keys.onPressed: {
                     if (api.keys.isCancel(event)) {
                         event.accepted = true;
@@ -366,7 +355,6 @@ FocusScope {
         }
 
         Component.onCompleted: {
-            // Inicialización optimizada
             var movies = filterMoviesByCollection("movies");
             baseMoviesFilter.clear();
 

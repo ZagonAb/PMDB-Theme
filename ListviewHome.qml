@@ -25,52 +25,36 @@ Item {
         bottom: parent.bottom
     }
 
-    // Define propiedades para los modelos
     property var randomMoviesModel
     property var unplayedMoviesModel
     property var continuePlayingMovies
     property var favoriteMovies
     property var recentlyAddedMoviesModelLimited
 
-    // Expón las listas como propiedades públicas
     property alias randomMoviesList: randomMoviesList
     property alias unplayedMoviesList: unplayedMoviesList
     property alias continuePlayingList: continuePlayingList
     property alias favoriteList: favoriteList
     property alias recentlyMoviesList: recentlyMoviesList
-
-    // Expón el Flickable como propiedad pública
     property alias contentFlickable: contentFlickable
-
-    // Expón las secciones como propiedades públicas
     property alias randomMoviesSection: randomMoviesSection
     property alias unplayedMoviesSection: unplayedMoviesSection
     property alias continuePlayingSection: continuePlayingSection
     property alias favoriteSection: favoriteSection
     property alias recentlyAddedSection: recentlyAddedSection
 
-    // Propiedad para controlar si la interfaz ya ha sido interactuada
     property bool hasUserInteracted: false
-
-    // Factor de escala para toda la UI basado en el tamaño de la ventana
     property real scaleFactor: Math.min(width / 1280, height / 720)
-
-    // Propiedades responsivas basadas en el scaleFactor
     property real sectionHeight: 320 * scaleFactor
     property real sectionSpacing: 25 * scaleFactor
     property real listMargin: 15 * scaleFactor
     property real titleSize: 18 * scaleFactor
-
-    // Propiedades para controlar el tamaño de los delegados
     property real delegateWidth: 180 * scaleFactor
     property real delegateHeight: 270 * scaleFactor
     property real delegateSpacing: 10 * scaleFactor
 
-    // Actualiza propiedades cuando cambia el tamaño de la ventana
     function updateSizes() {
         scaleFactor = Math.min(width / 1280, height / 720)
-
-        // Asegurarse de que haya valores mínimos y máximos
         sectionHeight = Math.min(Math.max(280, 320 * scaleFactor), 360)
         delegateWidth = Math.min(Math.max(150, 180 * scaleFactor), 220)
         delegateHeight = Math.min(Math.max(225, 270 * scaleFactor), 330)
@@ -78,7 +62,6 @@ Item {
         titleSize = Math.min(Math.max(16, 18 * scaleFactor), 24)
     }
 
-    // Conectar actualizaciones a cambios de tamaño
     onWidthChanged: updateSizes()
     onHeightChanged: updateSizes()
 
@@ -167,11 +150,13 @@ Item {
                     id: randomMoviesTitle
                     text: "Random movies"
                     color: "white"
+
                     font {
                         family: global.fonts.sans
                         pixelSize: listviewContainer.titleSize
                         bold: true
                     }
+
                     anchors {
                         left: parent.left
                         top: parent.top
@@ -183,6 +168,7 @@ Item {
                     id: randomMoviesList
                     orientation: Qt.Horizontal
                     focus: currentFocus === "random"
+
                     anchors {
                         top: randomMoviesTitle.bottom
                         topMargin: listviewContainer.listMargin * 0.5
@@ -192,6 +178,7 @@ Item {
                         leftMargin: listviewContainer.listMargin
                         rightMargin: listviewContainer.listMargin
                     }
+
                     model: randomMoviesModel
                     delegate: movieDelegate
                     spacing: listviewContainer.delegateSpacing
@@ -204,7 +191,6 @@ Item {
                     maximumFlickVelocity: 2500
                     boundsBehavior: Flickable.StopAtBounds
                     flickDeceleration: 1500
-
                     preferredHighlightBegin: 0
                     preferredHighlightEnd: listviewContainer.delegateWidth
 
@@ -228,11 +214,13 @@ Item {
                     id: unplayedMoviesTitle
                     text: "Unwatched movies"
                     color: "white"
+
                     font {
                         family: global.fonts.sans
                         pixelSize: listviewContainer.titleSize
                         bold: true
                     }
+
                     anchors {
                         left: parent.left
                         top: parent.top
@@ -289,11 +277,13 @@ Item {
                     id: continuePlayingTitle
                     text: "In progress movies"
                     color: "white"
+
                     font {
                         family: global.fonts.sans
                         pixelSize: listviewContainer.titleSize
                         bold: true
                     }
+
                     anchors {
                         left: parent.left
                         top: parent.top
@@ -315,7 +305,7 @@ Item {
                         rightMargin: listviewContainer.listMargin
                     }
                     model: continuePlayingMovies
-                    delegate: DelegateContinuePlaying {} // Usa el delegate específico
+                    delegate: DelegateContinuePlaying {}
                     spacing: listviewContainer.delegateSpacing
                     cacheBuffer: width * 3
                     displayMarginBeginning: listviewContainer.delegateWidth * 2
@@ -326,7 +316,6 @@ Item {
                     maximumFlickVelocity: 2500
                     boundsBehavior: Flickable.StopAtBounds
                     flickDeceleration: 1500
-
                     preferredHighlightBegin: 0
                     preferredHighlightEnd: listviewContainer.delegateWidth
 
@@ -350,11 +339,13 @@ Item {
                     id: favoriteTitle
                     text: "Favorite movies"
                     color: "white"
+
                     font {
                         family: global.fonts.sans
                         pixelSize: listviewContainer.titleSize
                         bold: true
                     }
+
                     anchors {
                         left: parent.left
                         top: parent.top
@@ -366,6 +357,7 @@ Item {
                     id: favoriteList
                     orientation: Qt.Horizontal
                     focus: currentFocus === "favorites"
+
                     anchors {
                         top: favoriteTitle.bottom
                         topMargin: listviewContainer.listMargin * 0.5
@@ -375,6 +367,7 @@ Item {
                         leftMargin: listviewContainer.listMargin
                         rightMargin: listviewContainer.listMargin
                     }
+
                     model: favoriteMovies
                     delegate: movieDelegate
                     spacing: listviewContainer.delegateSpacing
@@ -387,7 +380,6 @@ Item {
                     maximumFlickVelocity: 2500
                     boundsBehavior: Flickable.StopAtBounds
                     flickDeceleration: 1500
-
                     preferredHighlightBegin: 0
                     preferredHighlightEnd: listviewContainer.delegateWidth
 
@@ -403,17 +395,14 @@ Item {
         }
     }
 
-    // Inicializa cuando se carga el componente
     Component.onCompleted: {
         updateSizes();
     }
 
-    // Función para marcar que el usuario ha interactuado con la interfaz
     function setUserInteracted() {
         hasUserInteracted = true;
     }
 
-    // Conectar la interacción del usuario (por ejemplo, al presionar una tecla)
     Keys.onPressed: {
         if (!hasUserInteracted) {
             setUserInteracted();

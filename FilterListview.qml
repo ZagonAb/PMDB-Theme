@@ -85,7 +85,6 @@ Item {
         sourceModel: api.allGames
         filters: ExpressionFilter {
             expression: {
-                // Verificar que sea de la colección de movies y no haya sido jugada
                 var isMovieCollection = false;
                 for (var i = 0; i < collections.count; i++) {
                     if (collections.get(i).shortName === "movies") {
@@ -93,7 +92,6 @@ Item {
                         break;
                     }
                 }
-
                 return isMovieCollection && playCount === 0;
             }
         }
@@ -110,18 +108,17 @@ Item {
         sourceModel: baseMoviesFilter
         filters: ExpressionFilter {
             expression: {
-                // Verifica que el timestamp esté definido y sea un número válido
                 if (extra && extra["added-timestamp"]) {
                     var timestamp = extra["added-timestamp"];
                     return !isNaN(timestamp) && timestamp !== null && timestamp !== undefined;
                 }
-                return false; // Si no hay timestamp, excluir la película
+                return false;
             }
         }
 
         sorters: RoleSorter {
-            roleName: "added-timestamp" // Usa el timestamp para ordenar
-            sortOrder: Qt.DescendingOrder // Ordenar de más reciente a más antiguo
+            roleName: "added-timestamp"
+            sortOrder: Qt.DescendingOrder
         }
     }
 
@@ -129,15 +126,12 @@ Item {
         id: recentlyAddedMoviesModel
 
         Component.onCompleted: {
-            // Crear una lista temporal para ordenar
             var tempList = [];
-
-            // Recopilar todas las películas con timestamp de adición
             for (var i = 0; i < baseMoviesFilter.count; i++) {
                 var movie = baseMoviesFilter.get(i);
 
                 if (movie && movie.extra && movie.extra["added-timestamp"]) {
-                    var timestamp = parseInt(movie.extra["added-timestamp"]); // Asegurarse de que sea un número
+                    var timestamp = parseInt(movie.extra["added-timestamp"]);
                     if (!isNaN(timestamp)) {
                         tempList.push({
                             movieData: movie,
@@ -146,13 +140,10 @@ Item {
                     }
                 }
             }
-
-            // Ordenar la lista por timestamp (más reciente primero)
             tempList.sort(function(a, b) {
                 return b.timestamp - a.timestamp;
             });
 
-            // Agregar las películas ordenadas al ListModel
             for (var j = 0; j < tempList.length; j++) {
                 recentlyAddedMoviesModel.append(tempList[j].movieData);
             }
@@ -165,38 +156,29 @@ Item {
         id: recentlyAddedMoviesModelLimited
 
         Component.onCompleted: {
-            // Crear una lista temporal para ordenar
             var tempList = [];
-
-            // Recopilar todas las películas con timestamp de adición
             for (var i = 0; i < baseMoviesFilter.count; i++) {
                 var movie = baseMoviesFilter.get(i);
 
                 if (movie && movie.extra && movie.extra["added-timestamp"]) {
-                    var timestamp = parseInt(movie.extra["added-timestamp"]); // Asegurarse de que sea un número
+                    var timestamp = parseInt(movie.extra["added-timestamp"]);
                     if (!isNaN(timestamp)) {
                         tempList.push({
                             movieData: movie,
-                            timestamp: timestamp // Usar el timestamp directamente
+                            timestamp: timestamp
                         });
                     }
                 }
             }
 
-            // Ordenar la lista por timestamp (más reciente primero)
             tempList.sort(function(a, b) {
                 return b.timestamp - a.timestamp;
             });
-
-            // Limitar la lista a 15 elementos
             var maxMovies = 15;
             var limitedList = tempList.slice(0, maxMovies);
-
-            // Agregar las películas ordenadas y limitadas al ListModel
             for (var j = 0; j < limitedList.length; j++) {
                 recentlyAddedMoviesModelLimited.append(limitedList[j].movieData);
             }
-
             //console.log("recentlyAddedMoviesModelLimited populated with " + recentlyAddedMoviesModelLimited.count + " movies");
         }
     }
@@ -220,7 +202,7 @@ Item {
         id: randomMoviesModel
         Component.onCompleted: {
             var maxGames = 15;
-            var randomIndices = Utils.getRandomIndices(randomMoviesFilter.count);  // Usa Utils.getRandomIndices
+            var randomIndices = Utils.getRandomIndices(randomMoviesFilter.count);
             for (var j = 0; j < maxGames && j < randomIndices.length; ++j) {
                 var gameIndex = randomIndices[j];
                 var game = randomMoviesFilter.get(gameIndex);

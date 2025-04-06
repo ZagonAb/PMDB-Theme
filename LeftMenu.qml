@@ -17,167 +17,159 @@
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
 
-Rectangle {
+FocusScope {
     id: leftMenu
     width: parent.width * 0.2
     height: parent.height
-    color: "#aa000000"
+    focus: currentFocus === "menu"
+    property real scaleFactor: Math.min(width / 200, height / 800)
+    property real titleIconSize: 40 * scaleFactor
+    property real titleFontSize: 18 * scaleFactor
+    property real menuIconSize: 40 * scaleFactor
+    property real menuFontSize: 28 * scaleFactor
+    property real menuItemHeight: 80 * scaleFactor
+    property real menuItemSpacing: 40 * scaleFactor
+    property real menuMargin: 20 * scaleFactor
 
-    // Propiedades configurables para ajustar tamaños
-    property real scaleFactor: Math.min(width / 200, height / 800) // Factor de escala base
-    property real titleIconSize: 40 * scaleFactor // Tamaño del ícono del título
-    property real titleFontSize: 18 * scaleFactor // Tamaño de fuente del título
-    property real menuIconSize: 40 * scaleFactor // Tamaño de íconos del menú
-    property real menuFontSize: 28 * scaleFactor // Tamaño de fuente del menú
-    property real menuItemHeight: 80 * scaleFactor // Altura de cada elemento del menú
-    property real menuItemSpacing: 40 * scaleFactor // Espaciado entre ícono y texto
-    property real menuMargin: 20 * scaleFactor // Margen izquierdo del menú
+    Rectangle {
+        id: leftRectangle
+        anchors.fill: parent
+        color: "#aa000000"
 
-    // Timer para inicializar GenreList con un pequeño retraso
-    /*Timer {
-        id: genreListTimer
-        interval: 100
-        repeat: false
-        onTriggered: {
-            if (genreList.isVisible) {
-                genreList.focus = true;
-                if (genreList.genereListView) {
-                    genreList.genereListView.focus = true;
+        Row {
+            id: titleRow
+            anchors {
+                horizontalCenter: parent.horizontalCenter
+                top: parent.top
+                topMargin: 20 * leftMenu.scaleFactor
+            }
+            spacing: 10 * leftMenu.scaleFactor
+
+            Image {
+                id: titleIcon
+                source: "assets/icons/logo2.svg"
+                width: leftMenu.titleIconSize
+                height: leftMenu.titleIconSize
+                anchors.verticalCenter: parent.verticalCenter
+                asynchronous: true
+                mipmap: true
+            }
+
+            Text {
+                text: "PMDB-THEME"
+                color: "white"
+                font {
+                    family: global.fonts.sans
+                    pixelSize: leftMenu.titleFontSize
+                    bold: true
                 }
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
-    }*/
 
-    Row {
-        id: titleRow
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            top: parent.top
-            topMargin: 20 * leftMenu.scaleFactor
-        }
-        spacing: 10 * leftMenu.scaleFactor
-
-        Image {
-            id: titleIcon
-            source: "assets/icons/logo2.svg"
-            width: leftMenu.titleIconSize
-            height: leftMenu.titleIconSize
-            anchors.verticalCenter: parent.verticalCenter
-            asynchronous: true
-            mipmap: true
-        }
-
-        Text {
-            text: "PMDB-THEME"
-            color: "white"
-            font {
-                family: global.fonts.sans
-                pixelSize: leftMenu.titleFontSize
-                bold: true
-            }
-            anchors.verticalCenter: parent.verticalCenter
-        }
-    }
-
-    ListView {
-        id: menuList
-        width: parent.width
-        height: contentHeight
-        anchors {
-            top: titleRow.bottom
-            topMargin: 20 * leftMenu.scaleFactor
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-            bottomMargin: 20 * leftMenu.scaleFactor
-        }
-        focus: currentFocus === "menu"
-        model: ListModel {
-            ListElement { name: "Movies"; icon: "assets/icons/movies.svg" }
-            ListElement { name: "Genres"; icon: "assets/icons/genre.svg" }
-            ListElement { name: "Titles"; icon: "assets/icons/title.svg" }
-            ListElement { name: "Years"; icon: "assets/icons/year.svg" }
-            ListElement { name: "Rating"; icon: "assets/icons/rating.svg" }
-            ListElement { name: "Continue"; icon: "assets/icons/continueplaying.svg" }
-            ListElement { name: "Favorites"; icon: "assets/icons/favorite.svg" }
-            ListElement { name: "Search"; icon: "assets/icons/search.svg" }
-        }
-
-        delegate: Rectangle {
-            id: menuItem
+        ListView {
+            id: menuList
             width: parent.width
-            height: leftMenu.menuItemHeight
-            color: ListView.isCurrentItem && menuList.focus ? "#022441" : "transparent"
+            height: contentHeight
+            anchors {
+                top: titleRow.bottom
+                topMargin: 20 * leftMenu.scaleFactor
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+                bottomMargin: 20 * leftMenu.scaleFactor
+            }
+            focus: leftMenu.focus
+            model: ListModel {
+                ListElement { name: "Movies"; icon: "assets/icons/movies.svg" }
+                ListElement { name: "Genres"; icon: "assets/icons/genre.svg" }
+                ListElement { name: "Titles"; icon: "assets/icons/title.svg" }
+                ListElement { name: "Years"; icon: "assets/icons/year.svg" }
+                ListElement { name: "Rating"; icon: "assets/icons/rating.svg" }
+                ListElement { name: "Continue"; icon: "assets/icons/continueplaying.svg" }
+                ListElement { name: "Favorites"; icon: "assets/icons/favorite.svg" }
+                ListElement { name: "Search"; icon: "assets/icons/search.svg" }
+            }
 
-            Row {
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    left: parent.left
-                    leftMargin: leftMenu.menuMargin
-                }
-                spacing: leftMenu.menuItemSpacing
+            delegate: Rectangle {
+                id: menuItem
+                width: parent.width
+                height: leftMenu.menuItemHeight
+                color: ListView.isCurrentItem && menuList.focus ? "#022441" : "transparent"
 
-                Image {
-                    id: icon
-                    source: model.icon
-                    width: leftMenu.menuIconSize
-                    height: leftMenu.menuIconSize
-                    anchors.verticalCenter: parent.verticalCenter
-                    asynchronous: true
-                    mipmap: true
-                }
-
-                Text {
-                    text: model.name
-                    color: "white"
-                    font {
-                        family: global.fonts.sans
-                        pixelSize: leftMenu.menuFontSize
+                Row {
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        left: parent.left
+                        leftMargin: leftMenu.menuMargin
                     }
-                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: leftMenu.menuItemSpacing
+
+                    Image {
+                        id: icon
+                        source: model.icon
+                        width: leftMenu.menuIconSize
+                        height: leftMenu.menuIconSize
+                        anchors.verticalCenter: parent.verticalCenter
+                        asynchronous: true
+                        mipmap: true
+                    }
+
+                    Text {
+                        text: model.name
+                        color: "white"
+                        font {
+                            family: global.fonts.sans
+                            pixelSize: leftMenu.menuFontSize
+                        }
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+
+                Rectangle {
+                    visible: model.name === "Movies"
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                        bottom: parent.bottom
+                        margins: 5 * leftMenu.scaleFactor
+                    }
+                    height: 2
+                    color: "#022441"
                 }
             }
 
-            // Línea divisoria solo para el elemento "Movies"
-            Rectangle {
-                visible: model.name === "Movies"
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    bottom: parent.bottom
-                    margins: 5 * leftMenu.scaleFactor
+            Keys.onPressed: {
+                if (!event.isAutoRepeat && api.keys.isAccept(event)) {
+                    event.accepted = true;
+                    if (currentIndex >= 0 && currentIndex < model.count) {
+                        var selectedOption = model.get(currentIndex).name;
+                        handleMenuSelection(selectedOption);
+                    }
                 }
-                height: 2
-                color: "#022441"
             }
-        }
 
-        // Manejar la tecla de "Enter" o "Aceptar" para abrir el GridView
-        Keys.onPressed: {
-            if (!event.isAutoRepeat && api.keys.isAccept(event)) {
+            Keys.onRightPressed: {
+                currentFocus = "recently";
                 event.accepted = true;
-                if (currentIndex >= 0 && currentIndex < model.count) {
-                    var selectedOption = model.get(currentIndex).name;
-                    handleMenuSelection(selectedOption);
-                }
+            }
+
+            Keys.onUpPressed: {
+                decrementCurrentIndex();
+                event.accepted = true;
+            }
+
+            Keys.onDownPressed: {
+                incrementCurrentIndex();
+                event.accepted = true;
             }
         }
-
-        // Update in LeftMenu.qml
-        Keys.onRightPressed: {
-            currentFocus = "recently"
-        }
-
-        Keys.onUpPressed: decrementCurrentIndex()
-        Keys.onDownPressed: incrementCurrentIndex()
     }
 
-    // Función para recalcular los tamaños cuando cambie la resolución
     function updateSizes() {
         scaleFactor = Math.min(width / 200, height / 800)
     }
 
-    // Conectamos los cambios de tamaño para actualizar los valores
     onWidthChanged: updateSizes()
     onHeightChanged: updateSizes()
 
@@ -266,5 +258,11 @@ Rectangle {
             overlayImage.opacity = 0.7;
             currentMovie = null;
         }
+    }
+
+    function setFocus() {
+        focus = true;
+        menuList.focus = true;
+        menuList.currentIndex = 0;
     }
 }

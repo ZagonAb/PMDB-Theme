@@ -26,15 +26,11 @@ FocusScope {
     property bool isVisible: false
     property bool isExpanded: false
     property string selectedRatingRange: ""
-    property real scaleFactor: Math.min(width / 200, height / 800) // Factor de escala base
+    property real scaleFactor: Math.min(width / 200, height / 800)
     property real menuFontSize: 28 * scaleFactor
-
-
-
     visible: isVisible
     focus: isVisible
 
-    // Función para filtrar películas por colección
     function filterMoviesByCollection(collectionName) {
         var filteredMovies = [];
         for (var i = 0; i < api.allGames.count; i++) {
@@ -51,37 +47,30 @@ FocusScope {
 
     function createCategoriesFromRatings() {
         var moviesByRating = new Map();
-
-        // Crear rangos simplificados de 0.0 a 9.0
         var ratingRanges = [];
         for (var i = 9; i >= 0; i--) {
             ratingRanges.push({
                 label: i + ".0",
                 min: i/10,
-                max: (i+1)/10 - 0.0001 // Pequeña tolerancia para evitar solapamientos
+                max: (i+1)/10 - 0.0001
             });
         }
 
-        // Inicializar los mapas para cada rango
         ratingRanges.forEach(range => {
             moviesByRating.set(range.label, []);
         });
 
-        // Agrupar películas por rangos de calificación
         for (var k = 0; k < baseMoviesFilter.count; k++) {
             var movie = baseMoviesFilter.get(k);
-            var rating = movie.rating; // Ya está en escala 0-1
-
-            // Encontrar el rango correspondiente
+            var rating = movie.rating;
             var rangeIndex = Math.floor(rating * 10);
-            if (rangeIndex > 9) rangeIndex = 9; // Por si acaso hay valores > 0.999
-            if (rangeIndex < 0) rangeIndex = 0; // Por si acaso hay valores < 0
+            if (rangeIndex > 9) rangeIndex = 9;
+            if (rangeIndex < 0) rangeIndex = 0;
 
             var rangeLabel = rangeIndex + ".0";
             moviesByRating.get(rangeLabel).push(movie);
         }
 
-        // Convertir el mapa a un array con solo rangos que tengan películas
         var ratingsArray = [];
         ratingRanges.forEach(range => {
             var movies = moviesByRating.get(range.label);
@@ -99,7 +88,6 @@ FocusScope {
         return ratingsArray;
     }
 
-    // Función para cargar la lista de rangos de calificación en ratingListModel
     function updateRatingsList() {
         ratingListModel.clear();
         var ratingsData = createCategoriesFromRatings();
@@ -142,24 +130,20 @@ FocusScope {
         }
         color: "transparent"
 
-        // Modelo para almacenar la lista de rangos de calificación disponibles
         ListModel {
             id: ratingListModel
         }
 
-        // Filtra solo las películas en la colección "movies"
         ListModel {
             id: baseMoviesFilter
         }
 
-        // Ordena películas por calificación
         SortFilterProxyModel {
             id: moviesByRatingFilter
             sourceModel: baseMoviesFilter
             sorters: RoleSorter { roleName: "rating"; sortOrder: Qt.DescendingOrder }
         }
 
-        // Filtra películas por rango de calificación seleccionado
         SortFilterProxyModel {
             id: filteredMoviesByRating
             sourceModel: baseMoviesFilter
@@ -167,24 +151,23 @@ FocusScope {
                 RangeFilter {
                     id: ratingMinFilter
                     roleName: "rating"
-                    minimumValue: -1  // Se establecerá cuando se seleccione un rango
-                    maximumValue: 2   // Valor predeterminado, cambiará cuando se seleccione un rango
+                    minimumValue: -1
+                    maximumValue: 2
                 },
                 ValueFilter {
                     id: ratingNoRatingFilter
                     roleName: "rating"
-                    enabled: false    // Activado solo para "No Rating"
+                    enabled: false
                     value: 0.0
                 }
             ]
-            // Ordenar las películas por calificación (de mayor a menor)
+
             sorters: RoleSorter {
                 roleName: "rating"
                 sortOrder: Qt.DescendingOrder
             }
         }
 
-        // Diseño de la UI
         RowLayout {
             anchors.fill: parent
             spacing: 10
@@ -205,10 +188,10 @@ FocusScope {
 
                     delegate: Rectangle {
                         id: ratingDelegate
-                        width: ratingsListView.width //- 20
-                        height: 60 // Altura más compacta como en la imagen
+                        width: ratingsListView.width
+                        height: 60
                         color: ListView.isCurrentItem && ratingsListView.focus ? "#006dc7" : "transparent"
-                        radius: 5 // Sin bordes redondeados
+                        radius: 5
 
 
                         Row {
@@ -220,8 +203,8 @@ FocusScope {
                             spacing: 4
 
                             Text {
-                                text: "★" // Estrella
-                                color: "#ffcc00" // Color amarillo/dorado para la estrella
+                                text: "★"
+                                color: "#ffcc00"
                                 font {
                                     family: global.fonts.sans
                                     pixelSize: ratingList.menuFontSize
@@ -232,7 +215,7 @@ FocusScope {
                             }
 
                             Text {
-                                text: model.label // Muestra el label
+                                text: model.label
                                 color: "white"
                                 font {
                                     family: global.fonts.sans
@@ -252,7 +235,6 @@ FocusScope {
                         }
                     }
 
-                    // Manejar la navegación con las teclas de dirección y la tecla "Cancel"
                     Keys.onPressed: {
                         if (event.key === Qt.Key_Up) {
                             event.accepted = true;
@@ -270,40 +252,32 @@ FocusScope {
                             }
                         } else if (event.key === Qt.Key_Right) {
                             event.accepted = true;
-                            // Mover el foco al GridView
                             moviesGridView.focus = true;
                         } else if (api.keys.isCancel(event)) {
                             event.accepted = true;
-                            // Reiniciar los filtros al salir
                             if (ratingListModel.count > 0) {
                                 var firstItem = ratingListModel.get(0);
                                 setFilterForRating(firstItem.min, firstItem.max, firstItem.label);
                             }
 
-                            // Llamar a la función para salir de RatingList
                             Utils.hideRatingList();
                         }
                     }
 
-                    // Asegurarse de que el ListView tenga el foco al entrar
                     focus: true
                 }
             }
 
-            /*GridView {
-                id: moviesGridView
-                width: parent.width - ratingsListView.width - 20
-                height: parent.height*/
             GridView {
                 id: moviesGridView
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                cellWidth: width / 4  // 4 columnas
-                cellHeight: height / 2 // 2 filas
-                clip: true // Para evitar que los elementos se salgan del área visible
+                cellWidth: width / 4
+                cellHeight: height / 2
+                clip: true
 
                 cacheBuffer: cellHeight * 8
-                boundsBehavior: Flickable.StopAtBounds // Comportamiento más predecible
+                boundsBehavior: Flickable.StopAtBounds
 
                 model: filteredMoviesByRating
 
@@ -325,8 +299,6 @@ FocusScope {
                         radius: 0
                         z: 100
                     }
-
-                    Component.onCompleted: console.log("scaleFactor:", scaleFactor, "menuFontSize:", menuFontSize)
 
                     Column {
                         anchors.fill: parent
@@ -399,7 +371,7 @@ FocusScope {
                                     }
                                     horizontalAlignment: Text.AlignHCenter
                                     width: parent.width
-                                    color: "#FFD700" // Color dorado para las calificaciones
+                                    color: "#FFD700"
                                     visible: model.rating > 0
                                 }
                             }
@@ -429,13 +401,12 @@ FocusScope {
                     }
                 }
 
-                // Manejar la navegación con las teclas de dirección en el GridView
                 Keys.onPressed: {
                     if (event.key === Qt.Key_Left) {
                         event.accepted = true;
                         if (moviesGridView.currentIndex === 0) {
                             ratingsListView.focus = true;
-                            backgroundImage.source = ""; // Limpiar background al volver
+                            backgroundImage.source = "";
                         } else {
                             moviesGridView.moveCurrentIndexLeft();
                         }
@@ -451,17 +422,15 @@ FocusScope {
                     } else if (api.keys.isCancel(event)) {
                         event.accepted = true;
                         ratingsListView.focus = true;
-                        backgroundImage.source = ""; // Limpiar background al retroceder
+                        backgroundImage.source = "";
                     } else if (api.keys.isAccept(event)) {
                         event.accepted = true;
                         if (currentIndex >= 0) {
-                            Utils.showDetails(movieDetails, filteredMoviesByRating.get(currentIndex), "RatingList"); // Pasar "gridViewTitles" como previousFocus
-                            //genreList.visible = false; // Ocultar el grid al mostrar los detalles
+                            Utils.showDetails(movieDetails, filteredMoviesByRating.get(currentIndex), "RatingList");
                         }
                     }
                 }
 
-                // Asegurarse de que el GridView tenga el foco al entrar desde el ListView
                 focus: false
             }
 
@@ -474,8 +443,6 @@ FocusScope {
                 baseMoviesFilter.append(movies[i]);
             }
             updateRatingsList();
-
-            // Seleccionar el primer rango de calificación al cargar
             if (ratingListModel.count > 0) {
                 ratingsListView.currentIndex = 0;
                 var firstItem = ratingListModel.get(0);
@@ -488,21 +455,17 @@ FocusScope {
         //console.log("Filtrando por: " + label + " (min: " + min + ", max: " + max + ")");
 
         if (label === "0.0") {
-            // Modificar para mostrar todas las películas sin calificación
             ratingMinFilter.enabled = true;
             ratingNoRatingFilter.enabled = false;
             ratingMinFilter.minimumValue = 0.0;
-            ratingMinFilter.maximumValue = 0.099; // Incluir películas con ratings muy bajos
+            ratingMinFilter.maximumValue = 0.099;
         } else {
-            // Configurar filtro de rango para películas con calificación
             ratingMinFilter.enabled = true;
             ratingNoRatingFilter.enabled = false;
-            ratingMinFilter.minimumValue = min - 0.0001; // Pequeña tolerancia
-            ratingMinFilter.maximumValue = max + 0.0001; // Pequeña tolerancia
+            ratingMinFilter.minimumValue = min - 0.0001;
+            ratingMinFilter.maximumValue = max + 0.0001;
         }
         selectedRatingRange = label;
-
-        // Asegurarnos de que el GridView se actualice correctamente
         moviesGridView.currentIndex = 0;
         moviesGridView.positionViewAtBeginning();
     }

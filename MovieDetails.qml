@@ -29,8 +29,8 @@ FocusScope {
     z: 1000
 
     property var currentMovie: null
-    property string previousFocus: "" // Almacenar el foco anterior
-    property var externalMediaPlayer: null // Nueva propiedad para el reproductor externo
+    property string previousFocus: ""
+    property var externalMediaPlayer: null
 
     property var mediaPlayer: MediaPlayerComponent {
         id: internalMediaPlayer
@@ -39,14 +39,12 @@ FocusScope {
         movieDetailsRoot: movieDetailsRoot
     }
 
-    // Cuando se asigna un reproductor externo, reemplazamos el interno
     onExternalMediaPlayerChanged: {
         if (externalMediaPlayer) {
             mediaPlayer = externalMediaPlayer;
         }
     }
 
-    // Fondo con screenshot de la película
     Image {
         id: backgroundImage
         anchors.fill: parent
@@ -56,7 +54,6 @@ FocusScope {
         cache: true
     }
 
-    // Overlay semi-transparente
     Rectangle {
         id: overlay
         anchors.fill: parent
@@ -67,7 +64,6 @@ FocusScope {
     Rectangle {
         id: videoOverlay
         anchors.fill: parent
-
         color: "#000000"
         opacity: mediaPlayer.visible ? 1 : 0.0
         z: 1001
@@ -82,28 +78,24 @@ FocusScope {
                 GradientStop { position: 0.5; color: Qt.rgba(0.02, 0.36, 0.77, 0.3) } // Color claro en el centro
                 GradientStop { position: 0.8; color: Qt.rgba(0.02, 0.36, 0.77, 0.1) } // Transición suave
                 GradientStop { position: 1.0; color: "#000000" }
-
-                 // Transparente en los bordes
             }
+
             horizontalRadius: parent.width * 0.5
             verticalRadius: parent.height * 0.7
             source: videoOverlay
             visible: mediaPlayer.visible
         }
 
-        // Contenedor principal para todos los elementos durante la reproducción
         Item {
             id: videoOverlayContent
             anchors.fill: parent
 
-            // Contenedor superior (20%) para el logo
             Item {
                 id: logoContainer
                 width: parent.width
-                height: parent.height * 0.2  // 20% del alto del padre
+                height: parent.height * 0.2
                 anchors.top: parent.top
 
-                // Imagen del logo centrada
                 Image {
                     id: movieLogo
                     source: currentMovie ? currentMovie.assets.logo || "" : ""
@@ -117,7 +109,6 @@ FocusScope {
                     Behavior on opacity { NumberAnimation { duration: 200 } }
                 }
 
-                // Efecto de sombra para el logo
                 DropShadow {
                     anchors.fill: movieLogo
                     source: movieLogo
@@ -137,21 +128,19 @@ FocusScope {
                 anchors.bottom: parent.bottom
 
                 Column {
-                    width: parent.width //* 0.95  // Usar 95% del ancho para mejor margen
+                    width: parent.width
                     anchors.centerIn: parent
                     spacing:  parent.height * 0.1
 
-                    // Fila superior - Ruta del archivo (ahora correctamente centrada)
                     Item {
                         width: parent.width
-                        height: bottomContainer.height * 0.1  // Altura fija para mejor alineación
+                        height: bottomContainer.height * 0.1
 
                         Row {
                             id: filePathRow
                             anchors.centerIn: parent
                             spacing: 10
 
-                            // Icono de película
                             Image {
                                 source: "assets/icons/movie-file.svg"
                                 width: 24
@@ -160,7 +149,6 @@ FocusScope {
                                 anchors.verticalCenter: parent.verticalCenter
                             }
 
-                            // Texto con la ubicación del archivo
                             Text {
                                 id: videoPathText
                                 text: currentMovie ? Utils.getMovieFilePath(currentMovie) : "N/A"
@@ -177,9 +165,9 @@ FocusScope {
                                     target: movieDetailsRoot
                                     function onCurrentMovieChanged() {
                                         if (currentMovie) {
-                                            text = Utils.getMovieFilePath(currentMovie);
-                                            elide = Text.ElideRight;
-                                            wrapMode = Text.NoWrap;
+                                            videoPathText.text = Utils.getMovieFilePath(currentMovie);
+                                            videoPathText.elide = Text.ElideRight;
+                                            videoPathText.wrapMode = Text.NoWrap;
                                         }
                                     }
                                 }
@@ -204,17 +192,14 @@ FocusScope {
                         }
                     }
 
-                    // Fila inferior - InfoRow con detalles técnicos
                     Item {
                         width: parent.width
-                        height: bottomContainer.height * 0.1  // Altura fija para mejor alineación
-
+                        height: bottomContainer.height * 0.1
                         Row {
                             id: infoRow
                             anchors.centerIn: parent
                             spacing: 15
 
-                            // Componente reutilizable para los rectángulos de texto
                             component InfoRectangle: Rectangle {
                                 property alias text: label.text
                                 width: label.implicitWidth + 20
@@ -236,7 +221,6 @@ FocusScope {
                                 }
                             }
 
-                            // Icono de calendario
                             Image {
                                 source: "assets/icons/calen.svg"
                                 width: 24
@@ -245,7 +229,6 @@ FocusScope {
                                 mipmap: true
                             }
 
-                            // Fecha
                             InfoRectangle {
                                 text: {
                                     if (!currentMovie || !currentMovie.release) return "N/A";
@@ -259,31 +242,26 @@ FocusScope {
                                 }
                             }
 
-                            // Duración
                             InfoRectangle {
                                 text: currentMovie && currentMovie.extra && currentMovie.extra["duration"] ?
                                 currentMovie.extra["duration"] + " min" : "N/A"
                             }
 
-                            // Formato video
                             InfoRectangle {
                                 text: currentMovie && currentMovie.extra && currentMovie.extra["codec"] ?
                                 currentMovie.extra["codec"] : "N/A"
                             }
 
-                            // Resolución
                             InfoRectangle {
                                 text: currentMovie && currentMovie.extra && currentMovie.extra["resolution"] ?
                                 currentMovie.extra["resolution"] : "N/A"
                             }
 
-                            // Relación de aspecto
                             InfoRectangle {
                                 text: currentMovie && currentMovie.extra && currentMovie.extra["aspect"] ?
                                 currentMovie.extra["aspect"] : "N/A"
                             }
 
-                            // Audio
                             InfoRectangle {
                                 text: currentMovie && currentMovie.extra && currentMovie.extra["audio"] ?
                                 currentMovie.extra["audio"] : "N/A"
@@ -302,11 +280,8 @@ FocusScope {
         color: "transparent"
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
+        property real scaleRatio: Math.min(width / 1920, height / 1080)
 
-        // Propiedad para establecer una escala base basada en la resolución de referencia
-        property real scaleRatio: Math.min(width / 1920, height / 1080) // Asumiendo 1920x1080 como resolución de referencia
-
-        // Contenedor principal para los detalles
         Item {
             id: itemContainer
             width: parent.width * 0.8
@@ -314,7 +289,6 @@ FocusScope {
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
 
-            // Contenedor para centrar el Row
             Item {
                 id: rowWrapper
                 width: parent.width
@@ -330,9 +304,8 @@ FocusScope {
                     width: parent.width * 0.9
                     height: parent.height * 0.9
                     anchors.centerIn: parent
-                    spacing: 30 * rectangleitem.scaleRatio // Escalar el espaciado
+                    spacing: 30 * rectangleitem.scaleRatio
 
-                    // Columna izquierda con boxFront
                     Item {
                         id: leftColumn
                         width: parent.width * 0.25
@@ -341,7 +314,7 @@ FocusScope {
                         Image {
                             id: boxFrontImage
                             width: parent.width
-                            height: width * 1.5 // Proporción 2:3 estándar para pósters
+                            height: width * 1.5
                             source: currentMovie ? currentMovie.assets.boxFront || "" : ""
                             fillMode: Image.PreserveAspectFit
                             mipmap: true
@@ -349,16 +322,15 @@ FocusScope {
                             anchors.top: parent.top
                         }
 
-                        // Botones debajo del póster
                         FocusScope {
                             id: buttonsColumn
                             anchors {
                                 top: boxFrontImage.bottom
                                 left: parent.left
                                 right: parent.right
-                                topMargin: 20 * rectangleitem.scaleRatio // Escalar margen
+                                topMargin: 20 * rectangleitem.scaleRatio
                             }
-                            height: children[0].height // La altura se ajustará automáticamente
+                            height: children[0].height
                             focus: movieDetailsRoot.focus
 
                             property int currentIndex: 0
@@ -366,15 +338,14 @@ FocusScope {
                             Column {
                                 id: buttonsLayout
                                 width: parent.width
-                                spacing: 12 * rectangleitem.scaleRatio // Escalar espaciado
+                                spacing: 12 * rectangleitem.scaleRatio
 
-                                // Botón Launch
                                 Rectangle {
                                     id: btnLaunch
                                     width: parent.width
-                                    height: 46 * rectangleitem.scaleRatio // Escalar altura
+                                    height: 46 * rectangleitem.scaleRatio
                                     color: btnLaunch.activeFocus ? "#006dc7" : "#044173"
-                                    radius: 6 * rectangleitem.scaleRatio // Escalar radio
+                                    radius: 6 * rectangleitem.scaleRatio
                                     border.width: btnLaunch.activeFocus ? 2 : 0
                                     border.color: "white"
                                     focus: true
@@ -384,7 +355,7 @@ FocusScope {
                                         color: "white"
                                         font {
                                             family: global.fonts.sans
-                                            pixelSize: Math.max(12, 18 * rectangleitem.scaleRatio) // Escalar tamaño de fuente con un mínimo
+                                            pixelSize: Math.max(12, 18 * rectangleitem.scaleRatio)
                                             bold: true
                                         }
                                         anchors.centerIn: parent
@@ -394,12 +365,9 @@ FocusScope {
                                         if (api.keys.isAccept(event)) {
                                             event.accepted = true;
 
-                                            // Opción 1: Si currentMovie es un juego Pegasus válido
                                             if (typeof currentMovie.launch === "function") {
                                                 currentMovie.launch();
-                                            }
-                                            // Opción 2: Buscar por título en las colecciones
-                                            else if (currentMovie && currentMovie.title) {
+                                            } else if (currentMovie && currentMovie.title) {
                                                 Utils.launchGameFromMoviesCollection(currentMovie.title);
                                             } else {
                                                 console.error("No hay título válido para lanzar.");
@@ -409,8 +377,11 @@ FocusScope {
                                             btnFavorite.focus = true;
                                         } else if (api.keys.isCancel(event)) {
                                             event.accepted = true;
+                                            event.accepted = true;
                                             Utils.hideDetails(movieDetailsRoot);
-                                            if (previousFocus === "gridView") {
+                                            if (previousFocus === "search") {
+                                                searchMovie.restoreFocus();
+                                            } else if (previousFocus === "gridView") {
                                                 gridViewMovies.visible = true;
                                                 gridViewMovies.focus = true;
                                             } else if (previousFocus === "gridViewTitles") {
@@ -441,13 +412,12 @@ FocusScope {
                                     }
                                 }
 
-                                // Botón Favorite
                                 Rectangle {
                                     id: btnFavorite
                                     width: parent.width
-                                    height: 46 * rectangleitem.scaleRatio // Escalar altura
+                                    height: 46 * rectangleitem.scaleRatio
                                     color: btnFavorite.activeFocus ? "#006dc7" : "#044173"
-                                    radius: 6 * rectangleitem.scaleRatio // Escalar radio
+                                    radius: 6 * rectangleitem.scaleRatio
                                     border.width: btnFavorite.activeFocus ? 2 : 0
                                     border.color: "white"
 
@@ -457,13 +427,12 @@ FocusScope {
                                         color: "white"
                                         font {
                                             family: global.fonts.sans
-                                            pixelSize: Math.max(12, 18 * rectangleitem.scaleRatio) // Escalar tamaño de fuente con un mínimo
+                                            pixelSize: Math.max(12, 18 * rectangleitem.scaleRatio)
                                             bold: true
                                         }
                                         anchors.centerIn: parent
                                     }
 
-                                    // Actualizar el texto cuando cambia currentMovie
                                     Connections {
                                         target: movieDetailsRoot
                                         function onCurrentMovieChanged() {
@@ -477,7 +446,6 @@ FocusScope {
                                         if (api.keys.isAccept(event)) {
                                             event.accepted = true;
                                             if (currentMovie) {
-                                                // Alterna el estado y actualiza el texto
                                                 var isNowFavorite = Utils.toggleGameFavorite(currentMovie.title);
                                                 favoriteText.text = isNowFavorite ? "Remove from favorites" : "Add to favorites";
                                             }
@@ -490,7 +458,9 @@ FocusScope {
                                         } else if (api.keys.isCancel(event)) {
                                             event.accepted = true;
                                             Utils.hideDetails(movieDetailsRoot);
-                                            if (previousFocus === "gridView") {
+                                            if (previousFocus === "search") {
+                                                searchMovie.restoreFocus();
+                                            } else if (previousFocus === "gridView") {
                                                 gridViewMovies.visible = true;
                                                 gridViewMovies.focus = true;
                                             } else if (previousFocus === "gridViewTitles") {
@@ -521,13 +491,12 @@ FocusScope {
                                     }
                                 }
 
-                                // Botón Play Trailer
                                 Rectangle {
                                     id: btnPlayTrailer
                                     width: parent.width
-                                    height: 46 * rectangleitem.scaleRatio // Escalar altura
+                                    height: 46 * rectangleitem.scaleRatio
                                     color: btnPlayTrailer.activeFocus ? "#006dc7" : "#044173"
-                                    radius: 6 * rectangleitem.scaleRatio // Escalar radio
+                                    radius: 6 * rectangleitem.scaleRatio
                                     border.width: btnPlayTrailer.activeFocus ? 2 : 0
                                     border.color: "white"
 
@@ -536,7 +505,7 @@ FocusScope {
                                         color: "white"
                                         font {
                                             family: global.fonts.sans
-                                            pixelSize: Math.max(12, 18 * rectangleitem.scaleRatio) // Escalar tamaño de fuente con un mínimo
+                                            pixelSize: Math.max(12, 18 * rectangleitem.scaleRatio)
                                             bold: true
                                         }
                                         anchors.centerIn: parent
@@ -589,7 +558,6 @@ FocusScope {
                         }
                     }
 
-                    // Columna derecha con información
                     Column {
                         id: columnConteiner
                         width: parent.width - leftColumn.width - parent.spacing
@@ -598,22 +566,19 @@ FocusScope {
                         height: Math.min(implicitHeight, parent.height * 0.7)
                         spacing: parent.height * 0.02
 
-                        // Título de la película
                         Text {
                             text: currentMovie ? currentMovie.title : ""
                             color: "white"
                             font {
                                 family: global.fonts.sans
-                                pixelSize: Math.max(28, 42 * rectangleitem.scaleRatio) // Escalar tamaño de fuente con un mínimo
+                                pixelSize: Math.max(28, 42 * rectangleitem.scaleRatio)
                                 bold: true
                             }
                             width: parent.width
                         }
 
-                        // Información de clasificación y duración
                         Row {
                             spacing: parent.height * 0.05
-                            //topPadding: -10
 
                             Row {
                                 spacing: 15 * rectangleitem.scaleRatio
@@ -658,25 +623,23 @@ FocusScope {
                                 }
                             }
 
-                            // Fecha de estreno
                             Text {
                                 text: currentMovie && currentMovie.releaseYear ? currentMovie.releaseYear : "N/A"
                                 color: "white"
                                 anchors.verticalCenter: parent.verticalCenter
                                 font {
                                     family: global.fonts.sans
-                                    pixelSize: Math.max(16, 22 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                    pixelSize: Math.max(16, 22 * rectangleitem.scaleRatio)
                                 }
                             }
 
-                            // Géneros
                             Text {
                                 text: currentMovie && currentMovie.genre ? currentMovie.genre : "N/A"
                                 color: "white"
                                 anchors.verticalCenter: parent.verticalCenter
                                 font {
                                     family: global.fonts.sans
-                                    pixelSize: Math.max(16, 22 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                    pixelSize: Math.max(16, 22 * rectangleitem.scaleRatio)
                                 }
                             }
 
@@ -688,12 +651,11 @@ FocusScope {
                                 anchors.verticalCenter: parent.verticalCenter
                                 font {
                                     family: global.fonts.sans
-                                    pixelSize: Math.max(16, 22 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                    pixelSize: Math.max(16, 22 * rectangleitem.scaleRatio)
                                 }
                             }
                         }
 
-                        // Rating visual con círculo
                         Item {
                             height: 100 * rectangleitem.scaleRatio
                             width: parent.width
@@ -705,7 +667,6 @@ FocusScope {
                                     width: 90 * rectangleitem.scaleRatio
                                     height: 90 * rectangleitem.scaleRatio
 
-                                    // Fondo circular oscuro
                                     Rectangle {
                                         id: backgroundCircle
                                         anchors.fill: parent
@@ -721,7 +682,6 @@ FocusScope {
                                         property real rating: currentMovie ? currentMovie.rating || 0 : 0
                                         property color ratingColor: getColorForRating(rating)
 
-                                        // Función sin cambios
                                         function getColorForRating(rating) {
                                             if (rating >= 0.75) return "#A3E635";
                                             if (rating >= 0.6) return "#A3E635";
@@ -733,27 +693,24 @@ FocusScope {
                                             var ctx = getContext("2d");
                                             var centerX = width / 2;
                                             var centerY = height / 2;
-                                            var radius = width / 2 - 4 * rectangleitem.scaleRatio; // Escalar el margen
+                                            var radius = width / 2 - 4 * rectangleitem.scaleRatio;
 
-                                            // Dibuja el círculo de fondo
                                             ctx.beginPath();
                                             ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-                                            ctx.lineWidth = 3 * rectangleitem.scaleRatio; // Escalar grosor de línea
+                                            ctx.lineWidth = 3 * rectangleitem.scaleRatio;
                                             ctx.strokeStyle = "#333344";
                                             ctx.stroke();
 
-                                            // Dibuja el arco de progreso
                                             if (rating > 0) {
                                                 ctx.beginPath();
                                                 ctx.arc(centerX, centerY, radius, -Math.PI/2, (2 * Math.PI * rating) - Math.PI/2);
-                                                ctx.lineWidth = 3 * rectangleitem.scaleRatio; // Escalar grosor de línea
+                                                ctx.lineWidth = 3 * rectangleitem.scaleRatio;
                                                 ctx.strokeStyle = ratingColor;
                                                 ctx.stroke();
                                             }
                                         }
 
-                                        // Actualiza el canvas cuando cambia el rating
-                                        onRatingChanged: requestPaint()
+                                        onRatingChanged: requestPaint();
                                     }
 
                                     Text {
@@ -762,35 +719,31 @@ FocusScope {
                                         color: "white"
                                         font {
                                             family: global.fonts.sans
-                                            pixelSize: Math.max(10, 18 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                            pixelSize: Math.max(10, 18 * rectangleitem.scaleRatio)
                                             bold: true
                                         }
                                     }
                                 }
 
-                                // Texto User Score
                                 Text {
                                     text: "Rating\nScore"
                                     color: "white"
                                     font {
                                         family: global.fonts.sans
-                                        pixelSize: Math.max(14, 22 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                        pixelSize: Math.max(14, 22 * rectangleitem.scaleRatio)
                                         bold: true
                                     }
                                     lineHeight: 1.1
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
 
-                                // Emojis de reacción
                                 Row {
                                     spacing: 4 * rectangleitem.scaleRatio
                                     leftPadding: 20 * rectangleitem.scaleRatio
                                     anchors.verticalCenter: parent.verticalCenter
 
-                                    // Lista de emojis sin cambios
                                     property var emojiList: ["🤩", "😍", "😃", "😊", "🙂", "😐", "😕", "😞", "😠", "😡"]
 
-                                    // Función sin cambios
                                     function getEmojisForRating(rating) {
                                         var index = Math.min(Math.floor((1 - rating) * emojiList.length), emojiList.length - 3);
                                         if (rating < 0.1) {
@@ -810,13 +763,12 @@ FocusScope {
 
                                         Text {
                                             text: parent.currentEmojis[index]
-                                            font.pixelSize: Math.max(24, 42 * rectangleitem.scaleRatio) // Escalar tamaño de emojis
+                                            font.pixelSize: Math.max(24, 42 * rectangleitem.scaleRatio)
                                             opacity: index === 0 ? 1.0 : (index === 1 ? 0.7 : 0.4)
                                             anchors.verticalCenter: parent.verticalCenter
                                         }
                                     }
 
-                                    // Actualizar emojis cuando cambia el rating
                                     Connections {
                                         target: currentMovie
                                         function onRatingChanged() {
@@ -827,46 +779,42 @@ FocusScope {
                             }
                         }
 
-                        // Tagline o frase promocional
                         Text {
                             text: currentMovie && currentMovie.extra && currentMovie.extra["tagline"] ?
                             currentMovie.extra["tagline"] : "no tagline available..."
                             color: "#CCCCCC"
                             font {
                                 family: global.fonts.sans
-                                pixelSize: Math.max(16, 24 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                pixelSize: Math.max(16, 24 * rectangleitem.scaleRatio)
                                 italic: true
                             }
                             width: parent.width
                             wrapMode: Text.WordWrap
                         }
 
-                        // Título de Overview
                         Text {
                             text: "Overview"
                             color: "white"
                             font {
                                 family: global.fonts.sans
-                                pixelSize: Math.max(18, 26 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                pixelSize: Math.max(18, 26 * rectangleitem.scaleRatio)
                                 bold: true
                             }
                             topPadding: 10 * rectangleitem.scaleRatio
                         }
 
-                        // Descripción de la película
                         Text {
                             text: currentMovie ? currentMovie.description || "No description available." : "No description available."
                             color: "white"
                             font {
                                 family: global.fonts.sans
-                                pixelSize: Math.max(18, 24 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                pixelSize: Math.max(18, 24 * rectangleitem.scaleRatio)
                             }
                             wrapMode: Text.WordWrap
                             width: parent.width
                             lineHeight: 1.0
                         }
 
-                        // Información del equipo de producción
                         Grid {
                             columns: 2
                             rowSpacing: 15 * rectangleitem.scaleRatio
@@ -890,7 +838,7 @@ FocusScope {
                                         color: "#BBBBBB"
                                         font {
                                             family: global.fonts.sans
-                                            pixelSize: Math.max(16, 24 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                            pixelSize: Math.max(16, 24 * rectangleitem.scaleRatio)
                                             bold: true
                                         }
                                     }
@@ -900,7 +848,7 @@ FocusScope {
                                         color: "white"
                                         font {
                                             family: global.fonts.sans
-                                            pixelSize: Math.max(16, 24 * rectangleitem.scaleRatio) // Escalar tamaño de fuente
+                                            pixelSize: Math.max(16, 24 * rectangleitem.scaleRatio)
                                         }
                                     }
                                 }
@@ -911,7 +859,6 @@ FocusScope {
             }
         }
 
-        // Listener para actualizar scaleRatio cuando cambia el tamaño de la ventana
         onWidthChanged: {
             scaleRatio = Math.min(width / 1920, height / 1080)
         }
@@ -920,13 +867,11 @@ FocusScope {
             scaleRatio = Math.min(width / 1920, height / 1080)
         }
 
-        // Establecer un valor inicial para scaleRatio
         Component.onCompleted: {
             scaleRatio = Math.min(width / 1920, height / 1080)
         }
     }
 
-    // Cuando MovieDetails se vuelve visible, establecer el foco en el primer botón
     onVisibleChanged: {
         if (visible) {
             btnLaunch.focus = true;

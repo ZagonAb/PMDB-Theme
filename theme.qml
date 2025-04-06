@@ -27,27 +27,23 @@ FocusScope {
     id: root
     focus: true
 
-    // Detectar cambios de foco
     onFocusChanged: {
         if (focus) {
-            // El usuario ha vuelto a la interfaz
             console.log("Interfaz enfocada, actualizando progreso...");
             Utils.forceModelUpdate(collectionsItem.continuePlayingMovies);
             listviewContainer.continuePlayingList.model = collectionsItem.continuePlayingMovies;
         }
     }
 
-    // Imagen de fondo principal
     Image {
         id: backgroundImage
         anchors.fill: parent
-        source: "" //currentMovie ? (currentMovie.assets.screenshot || currentMovie.assets.background) : ""
+        source: ""
         fillMode: Image.PreserveAspectCrop
         mipmap: true
         cache: true
     }
 
-    // Imagen superpuesta semi-transparente
     Image {
         id: overlayImage
         anchors.fill: parent
@@ -57,7 +53,6 @@ FocusScope {
         mipmap: true
         cache: true
 
-        // Añadir esta transición
         Behavior on opacity {
             NumberAnimation { duration: 300; easing.type: Easing.OutQuad }
         }
@@ -70,9 +65,18 @@ FocusScope {
     property var game: null
     property var currentMovie: null
 
-    LeftMenu { id: leftMenu }
+    LeftMenu {
+        id: leftMenu
+        anchors {
+            left: parent.left
+            top: parent.top
+            bottom: parent.bottom
+        }
+         width: parent.width * 0.2
+    }
 
     FilterListview { id: collectionsItem }
+
     ListviewHome {
         id: listviewContainer
         recentlyAddedMoviesModelLimited: collectionsItem.recentlyAddedMoviesModelLimited
@@ -82,7 +86,6 @@ FocusScope {
         favoriteMovies: collectionsItem.favoriteMovies
     }
 
-    // Nuevo GridViewMovies
     GridViewMovies {
         id: gridViewMovies
         anchors {
@@ -105,11 +108,10 @@ FocusScope {
         isVisible: false
     }
 
-    // Modifica MovieDetails para usar el reproductor global
     MovieDetails {
         id: movieDetails
         anchors.fill: parent
-        externalMediaPlayer: globalMediaPlayer // Usa el nuevo nombre de propiedad
+        externalMediaPlayer: globalMediaPlayer
     }
 
     YearList {
@@ -123,7 +125,6 @@ FocusScope {
         isVisible: false
     }
 
-    // Añadir este componente junto a los otros componentes en theme.qml
     RatingList {
         id: ratingList
         anchors {
@@ -154,7 +155,7 @@ FocusScope {
         anchors.centerIn: parent
         z: 2000
         visible: false
-        movieDetailsRoot: movieDetails  // Pasar referencia
+        movieDetailsRoot: movieDetails
     }
 
     SearchMovie {
@@ -173,7 +174,6 @@ FocusScope {
     Keys.onPressed: {
         switch (event.key) {
             case Qt.Key_Left:
-                //console.log("Tecla Left presionada")
                 event.accepted = true
                 if (currentFocus === "search") {
                     searchMovie.clearAndHide()
@@ -181,26 +181,19 @@ FocusScope {
                     gridViewMovies.resetGridView();
                     gridViewTitles.hideGrid();
                 } else if (currentFocus === "yearList") {
-                    // Manejo de retroceso desde yearList
                     Utils.hideYearList();
-                    // Asegurarnos que listviewContainer esté visible
                     listviewContainer.visible = true;
-                    leftMenu.menuList.focus = true;
+                     Utils.setMenuFocus();
                 } else if (currentFocus === "ratingList") {
-                    // Manejo de retroceso desde ratingList
                     ratingList.hideRatingList();
-                    // Asegurarnos que listviewContainer esté visible
                     listviewContainer.visible = true;
-                    leftMenu.menuList.focus = true;
+                    Utils.setMenuFocus();
                 } else if (currentFocus !== "menu") {
-                    // Limpia la imagen de fondo explícitamente antes de cambiar el foco
                     backgroundImage.source = "";
                     currentMovie = null;
-                    // Asegúrate de que el overlay tenga la opacidad correcta
                     overlayImage.opacity = 0.7;
-                    // Ahora cambia el foco al menú
                     currentFocus = "menu";
-                    leftMenu.menuList.focus = true;
+                    Utils.setMenuFocus();
                 }
                 break
             case Qt.Key_Up:
@@ -271,7 +264,11 @@ FocusScope {
 
     onCurrentFocusChanged: {
         if (currentFocus === "menu") {
-            leftMenu.menuList.focus = true;
+            if (leftMenu && leftMenu.menuList) {
+                Utils.setMenuFocus();
+            } else {
+                //console.log("Advertencia: No se pudo establecer foco en menuList");
+            }
             backgroundImage.source = "";
             overlayImage.opacity = 0.7;
             currentMovie = null;

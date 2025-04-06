@@ -21,12 +21,14 @@ import "utils.js" as Utils
 
 Item {
     id: searchMovie
+
     anchors {
         left: parent.left
         right: parent.right
         top: parent.top
         bottom: parent.bottom
     }
+
     visible: false
     focus: false
 
@@ -35,12 +37,10 @@ Item {
     property string currentSearchTerm: ""
     property int lastFocusedIndex: 0
 
-    // Modelo para los resultados de búsqueda
     ListModel {
         id: searchResultsModel
     }
 
-    // Barra de búsqueda
     Rectangle {
         id: searchBar
         width: parent.width * 0.8
@@ -83,10 +83,8 @@ Item {
                 }
                 else if (api.keys.isCancel(event)) {
                     if (text.length > 0) {
-                        // Borra un carácter
                         text = text.substring(0, text.length - 1)
                     } else {
-                        // Si no hay texto, retrocede y limpia el fondo
                         backgroundImage.source = ""
                         clearAndHide()
                     }
@@ -99,7 +97,6 @@ Item {
                 }
             }
 
-            // Placeholder text
             Text {
                 text: "Search movies..."
                 color: "#aaaaaa"
@@ -112,28 +109,30 @@ Item {
             }
         }
     }
-    // GridView para resultados (una sola fila en la parte inferior)
+
     Rectangle {
         id: gridContainer
         width: parent.width * 0.95
-        height: parent.height * 0.5 // 40% del alto
+        height: parent.height * 0.5
+
         anchors {
             bottom: parent.bottom
-            bottomMargin: parent.height * 0.1 // 10% de margen inferior
+            bottomMargin: parent.height * 0.1
             horizontalCenter: parent.horizontalCenter
         }
+
         color: "transparent"
 
         GridView {
             id: resultsGrid
             anchors.fill: parent
-            cellWidth: width / 4 // Mostrar 5 elementos por fila
-            cellHeight: height // Una sola fila, altura completa del contenedor
+            cellWidth: width / 4
+            cellHeight: height
             clip: true
             model: searchResultsModel
             visible: searchResultsModel.count > 0
             focus: false
-            interactive: false // Deshabilitar scroll ya que es una sola
+            interactive: false
 
             delegate: Item {
                 width: resultsGrid.cellWidth
@@ -145,16 +144,15 @@ Item {
                     anchors.centerIn: parent
                     spacing: 10
 
-                    // Contenedor para la imagen con borde de selección
                     Item {
                         width: parent.width
-                        height: parent.height - 40 // Altura para el título
+                        height: parent.height - 40
 
                         Image {
                             id: posterImage
                             anchors.fill: parent
                             source: model.assets ? model.assets.boxFront : ""
-                            fillMode: Image.Stretch //PreserveAspectCrop
+                            fillMode: Image.Stretch
                             mipmap: true
                             asynchronous: true
                             cache: true
@@ -183,7 +181,7 @@ Item {
                         }
                         elide: Text.ElideRight
                         wrapMode: Text.WordWrap
-                        textFormat: Text.RichText // Añadir esto para interpretar el HTML
+                        textFormat: Text.RichText
                     }
                 }
             }
@@ -202,23 +200,21 @@ Item {
                 if (api.keys.isAccept(event)) {
                     event.accepted = true
                     if (resultsGrid.currentIndex >= 0) {
-                        // Guardar el índice actual antes de abrir detalles
                         lastFocusedIndex = currentIndex
-
-                        // Mostrar detalles de la película seleccionada
                         var selectedMovie = searchResultsModel.get(currentIndex)
                         Utils.showDetails(movieDetails, selectedMovie, "search")
                     }
                 }
+
                 else if (api.keys.isCancel(event)) {
                     backgroundImage.source = ""
                     searchBar.focus = true
                     searchInput.forceActiveFocus()
                     event.accepted = true
                 }
+
                 else if (event.key === Qt.Key_Left || event.key === Qt.Key_Right ||
                     event.key === Qt.Key_Up || event.key === Qt.Key_Down) {
-                    // Manejar navegación
                     if (event.key === Qt.Key_Left && resultsGrid.currentIndex > 0) {
                         resultsGrid.currentIndex--
                     }
@@ -232,15 +228,12 @@ Item {
                         resultsGrid.currentIndex++
                     }
                     event.accepted = true
-
-                    // Forzar actualización
-                    updateBackground()
-                    }
+                    Utils.updateBackground()
+                }
             }
         }
     }
 
-    // Texto cuando no hay resultados
     Text {
         id: noResultsText
         text: "No results found"
@@ -254,7 +247,6 @@ Item {
         visible: searchResultsModel.count === 0 && currentSearchTerm.length > 0
     }
 
-    // Texto inicial
     Text {
         text: "Start typing to search movies"
         color: "#aaaaaa"
@@ -266,7 +258,6 @@ Item {
         visible: searchResultsModel.count === 0 && currentSearchTerm.length === 0
     }
 
-    // Función para restaurar el foco después de volver de MovieDetails
     function restoreFocus() {
         if (isVisible) {
             resultsGrid.focus = true
@@ -281,7 +272,6 @@ Item {
             return
         }
 
-        // Buscar en la colección de películas
         for (var i = 0; i < api.collections.count; ++i) {
             var collection = api.collections.get(i)
             if (collection.shortName.toLowerCase() === "movies") {
@@ -318,6 +308,6 @@ Item {
         focus = false
         listviewContainer.visible = true
         currentFocus = "menu"
-        leftMenu.menuList.focus = true
+        Utils.setMenuFocus();
     }
 }
