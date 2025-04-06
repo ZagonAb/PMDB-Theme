@@ -10,8 +10,7 @@ Una interfaz visual inspirada en elementos de **TMDB** y **Kodi**, diseñada par
 - Puedes obtener los metadatos de tus películas utilizando la herramienta:
   👉 [PMDB-Scraper](https://github.com/ZagonAb/PMDB-Scraper)
 
-- Para visualizar correctamente la barra de progreso en la sección **"In progress movies"**, se recomienda usar el reproductor desarrollado específicamente para esta interfaz:  
-  🎬 [PMDB-Media-Player](https://github.com/ZagonAb/PMDB-Media-Player) aunque si lo prefieres, puedes utilizar otro reproductor a tu elección.
+- Para garantizar una visualización precisa del progreso en la barra de los títulos de **"In progress movies"**, se recomienda el uso del reproductor específicamente diseñado para esta interfaz:  🎬 [PMDB-Media-Player](https://github.com/ZagonAb/PMDB-Media-Player) Alternativamente, es posible utilizar otro reproductor compatible, aunque no se garantiza el mismo nivel de integración.
 
 ---
 
