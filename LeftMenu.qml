@@ -86,7 +86,7 @@ FocusScope {
                 ListElement { name: "Titles"; icon: "assets/icons/title.svg" }
                 ListElement { name: "Years"; icon: "assets/icons/year.svg" }
                 ListElement { name: "Rating"; icon: "assets/icons/rating.svg" }
-                ListElement { name: "Continue"; icon: "assets/icons/continueplaying.svg" }
+                ListElement { name: "Resume"; icon: "assets/icons/continueplaying.svg" }
                 ListElement { name: "Favorites"; icon: "assets/icons/favorite.svg" }
                 ListElement { name: "Search"; icon: "assets/icons/search.svg" }
             }
@@ -211,9 +211,9 @@ FocusScope {
                     currentFocus = "genreList";
                     genreList.focus = true;
                     break;
-                case "Continue":
-                    if (collectionsItem && collectionsItem.continuePlayingMovies) {
-                        gridViewMovies.currentModel = collectionsItem.continuePlayingMovies;
+                case "Resume":
+                    if (collectionsItem && collectionsItem.recentlyPlayedSignificantMovies) {
+                        gridViewMovies.currentModel = collectionsItem.recentlyPlayedSignificantMovies;
                         gridViewMovies.resetGridView();
                         gridViewMovies.isVisible = true;
                         currentFocus = "gridView";

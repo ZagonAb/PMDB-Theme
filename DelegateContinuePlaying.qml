@@ -35,7 +35,7 @@ Component {
         property real titleFontSize: Math.min(16, 14 * listviewContainer.scaleFactor)
         property real loadingSpinnerSize: Math.min(50, 40 * listviewContainer.scaleFactor)
 
-        Component.onCompleted: {
+        /*Component.onCompleted: {
             if (game) {
                 var durationValue = game.extra ? game.extra["duration"] || game.extra["duration"] : null;
                 var watchedTime = Utils.getLastPosition(game.title) / 1000; // Convertir a segundos
@@ -46,6 +46,29 @@ Component {
                     //console.log("ADVERTENCIA! No hay depuración);
                 }
                 progressPercentage = totalDuration > 0 ? Math.min(watchedTime / totalDuration, 1.0) : 0;
+
+                cachedData = {
+                    title: game.title || "",
+                    posterUrl: game.assets ? (game.assets.poster || game.assets.boxFront || "") : "",
+                    hasPoster: game.assets && (game.assets.poster || game.assets.boxFront),
+                    progress: progressPercentage,
+                    watchedTime: watchedTime,
+                    totalDuration: totalDuration
+                };
+            }
+        }*/
+
+        Component.onCompleted: {
+            if (game) {
+                var watchedTime = Utils.getLastPosition(game.title) / 1000; // Convertir a segundos
+                // Solo calcular progreso si hay tiempo visto
+                if (watchedTime > 0) {
+                    var durationValue = game.extra ? game.extra["duration"] || game.extra["duration"] : null;
+                    var totalDuration = durationValue ? parseInt(durationValue) * 60 : 0;
+                    progressPercentage = totalDuration > 0 ? Math.min(watchedTime / totalDuration, 1.0) : 0;
+                } else {
+                    progressPercentage = 0;
+                }
 
                 cachedData = {
                     title: game.title || "",
@@ -121,8 +144,8 @@ Component {
             }
             height: 6
             color: "#33ffffff"
-            visible: true
             z: 200
+            visible: progressPercentage > 0
 
             Rectangle {
                 id: progressBarFill

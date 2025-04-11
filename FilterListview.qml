@@ -20,6 +20,19 @@ import "utils.js" as Utils
 
 Item {
     id: collectionsItem
+
+    function isRecentlyPlayedSignificantly(game) {
+        return Utils.isRecentlyPlayedSignificantly(game);
+    }
+
+    function wasPlayedRecently(lastPlayed) {
+        return Utils.wasPlayedRecently(lastPlayed);
+    }
+
+    function hasSignificantPlayTime(playTime) {
+        return Utils.hasSignificantPlayTime(playTime);
+    }
+
     property alias randomMoviesModel: randomMoviesModel
     property alias unplayedMoviesModel: unplayedMoviesModel
     property alias continuePlayingMovies: continuePlayingMovies
@@ -28,6 +41,9 @@ Item {
     property alias recentlyAddedMoviesFilter: recentlyAddedMoviesFilter
     property alias recentlyAddedMoviesModel: recentlyAddedMoviesModel
     property alias recentlyAddedMoviesModelLimited: recentlyAddedMoviesModelLimited
+    property alias recentlyPlayedSignificantMovies: recentlyPlayedSignificantMovies
+
+
 
     SortFilterProxyModel {
         id: baseMoviesFilter
@@ -40,6 +56,16 @@ Item {
                     }
                 }
                 return false;
+            }
+        }
+    }
+
+    SortFilterProxyModel {
+        id: recentlyPlayedSignificantMovies
+        sourceModel: recentlyPlayedMovies
+        filters: ExpressionFilter {
+            expression: {
+                return collectionsItem.isRecentlyPlayedSignificantly(model);
             }
         }
     }

@@ -116,7 +116,7 @@ function updateProgress(game) {
 
 function getLastPosition(title) {
     try {
-        var filePath = "tmdb-theme.json";
+        var filePath = "pmdb-theme.json";
         var file = new XMLHttpRequest();
         file.open("GET", filePath, false);
         file.send(null);
@@ -130,7 +130,7 @@ function getLastPosition(title) {
     } catch (e) {
         //console.error("Error al leer el archivo JSON:", e);
     }
-    return 0;
+    return null; // Cambiado de 0 a null para indicar que no hay progreso
 }
 
 function getBackgroundImage(movie) {
@@ -345,3 +345,28 @@ function setMenuFocus() {
     return false;
 }
 
+function wasPlayedRecently(lastPlayed) {
+    if (!lastPlayed || lastPlayed.toString() === "Invalid Date") {
+        return false;
+    }
+
+    var currentDate = new Date();
+    var playedDate = new Date(lastPlayed);
+    var timeDiff = currentDate.getTime() - playedDate.getTime();
+    var daysDiff = timeDiff / (1000 * 3600 * 24);
+
+    return daysDiff <= 7;
+}
+
+function hasSignificantPlayTime(playTime) {
+    return playTime && playTime >= 60;
+}
+
+function isRecentlyPlayedSignificantly(game) {
+    if (!game) return false;
+
+    var wasRecentlyPlayed = wasPlayedRecently(game.lastPlayed);
+    var wasPlayedLongEnough = hasSignificantPlayTime(game.playTime);
+
+    return wasRecentlyPlayed && wasPlayedLongEnough;
+}
