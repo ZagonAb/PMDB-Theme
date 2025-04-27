@@ -1,6 +1,8 @@
 ## PMDB-Theme
 
-Una interfaz visual inspirada en elementos de **TMDB** y **Kodi**, diseñada para ofrecer una experiencia atractiva y ordenada al navegar por tus películas.
+- Esta interfaz es un proyecto independiente y no guarda relación oficial con **Pegasus Frontend**. Ha sido creada de forma personal para compartir con la comunidad.
+
+- Con influencias de **TMDB** y **Kodi**, esta interfaz combina diseño y funcionalidad para ofrecerte una navegación atractiva y ordenada por tus películas. Hecha especialmente para **Pegasus Frontend**.
 
 ### Importante antes de usar
 
