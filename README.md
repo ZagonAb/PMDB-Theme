@@ -16,6 +16,12 @@
 
 ---
 
+## Instalación
+
+"[Descarga](https://github.com/ZagonAb/PMDB-Theme/archive/refs/heads/main.zip) y extrae el tema en tu [directorio de temas](http://pegasus-frontend.org/docs/user-guide/installing-themes). **Recuerda** renombrar la carpeta extraída como **PMDB-Theme**, ya que el [PMDB-Media-Player](https://github.com/ZagonAb/PMDB-Media-Player) necesita encontrar esa carpeta dentro de **themes** para guardar la posición de reproducción en `database.json` y completar su integración con la interfaz. Después podrás activarlo desde el menú de configuración de Pegasus."
+
+---
+
 ## Capturas
 
 ![screen](https://github.com/ZagonAb/pegasus-tmdb-theme/blob/c3f6576c5cb2e33dc51746ce6a0c6a6e4ffe2262/.meta/screenshot/screen1.png)
