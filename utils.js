@@ -116,7 +116,7 @@ function updateProgress(game) {
 
 function getLastPosition(title) {
     try {
-        var filePath = "pmdb-theme.json";
+        var filePath = "database.json";
         var file = new XMLHttpRequest();
         file.open("GET", filePath, false);
         file.send(null);
@@ -184,10 +184,16 @@ function isModelEmpty(model) {
 function formatVideoPath(gameItem, showFullPath = false) {
     var fullPath = getMainVideoPathCached(gameItem);
     if (!fullPath || fullPath === "") return "No disponible";
-    if (showFullPath) return fullPath;
-    var diskMatch = fullPath.match(/(Disco [A-Z0-9]+|Disco_[A-Z0-9]+|Disk [A-Z0-9]+|Disk_[A-Z0-9]+)/i);
-    var diskName = diskMatch ? diskMatch[0] : "Media";
-    var fileName = fullPath.split('/').pop();
+
+    if (showFullPath) {
+        return fullPath;
+    }
+
+    var diskMatch = fullPath.match(/(Disco [A-Z0-9]+|Disco_[A-Z0-9]+|Disk [A-Z0-9]+|Disk_[A-Z0-9]+|Volume [A-Z0-9]+|Volume_[A-Z0-9]+)/i);
+    var diskName = diskMatch ? diskMatch[0] : "source";
+
+    var fileName = fullPath.split(/[\\/]/).pop();
+
     return diskName + "/.../" + fileName;
 }
 
