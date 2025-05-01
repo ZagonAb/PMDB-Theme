@@ -31,5 +31,6 @@
 ![screen4](https://github.com/ZagonAb/pegasus-tmdb-theme/blob/c3f6576c5cb2e33dc51746ce6a0c6a6e4ffe2262/.meta/screenshot/screen3.png)
 ![screen5](https://github.com/ZagonAb/pegasus-tmdb-theme/blob/4e45eb26f41cc0c3fc245d70aa05042c2c04d4e7/.meta/screenshot/screen.png)
 ![screen6](https://github.com/ZagonAb/pegasus-tmdb-theme/blob/40ce9eb13f2ef276b238bb84d65c41c0ae92e07e/.meta/screenshot/screen5.png)
+![screen8](https://github.com/ZagonAb/PMDB-Theme/blob/4acfa9b955e24f645cd4722fbd324999088f049e/.meta/screenshot/screen8.png)
 ![screen7](https://github.com/ZagonAb/pegasus-tmdb-theme/blob/c3f6576c5cb2e33dc51746ce6a0c6a6e4ffe2262/.meta/screenshot/screen7.png)
 
