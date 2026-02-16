@@ -1,31 +1,36 @@
 ## PMDB-Theme
 
-- Esta interfaz es un proyecto independiente y no guarda relación oficial con **Pegasus Frontend**. Ha sido creada de forma personal para compartir con la comunidad.
+* This interface is an independent project and has no official relationship with **Pegasus Frontend**. It was created personally to be shared with the community.
 
-- Con influencias de **TMDB** y **Kodi**, esta interfaz combina diseño y funcionalidad para ofrecerte una navegación atractiva y ordenada por tus películas. Hecha especialmente para **Pegasus Frontend**.
+* Inspired by **TMDB** and **Kodi**, this interface combines design and functionality to provide an attractive and well-organized way to browse your movie collection. Specially made for **Pegasus Frontend**.
 
-### Importante antes de usar
+### Important Before Using
 
-- Este tema está **diseñado exclusivamente** para la colección con el identificador **`shortName: movies`**
-  > ⚠️ No es compatible con colecciones de juegos.
+* This theme is **exclusively designed** for collections using the identifier **`shortName: movies`**
 
-- Puedes obtener los metadatos de tus películas utilizando la herramienta:
+  > ⚠️ Not compatible with game collections.
+
+* You can obtain metadata for your movies using the following tool:
   👉 [PMDB-Scraper](https://github.com/ZagonAb/PMDB-Scraper)
 
-- Para garantizar una visualización precisa del progreso en la barra de los títulos de **"In progress movies"**, se recomienda el uso del reproductor específicamente diseñado para esta interfaz:  🎬 [PMDB-Media-Player](https://github.com/ZagonAb/PMDB-Media-Player) Alternativamente, es posible utilizar otro reproductor compatible, aunque no se garantiza el mismo nivel de integración.
+* To ensure accurate progress display in the **"In progress movies"** title bar, it is recommended to use the media player specifically designed for this interface:
+  🎬 [PMDB-Media-Player](https://github.com/ZagonAb/PMDB-Media-Player)
+
+  Alternatively, another compatible player may be used, although the same level of integration is not guaranteed.
 
 ---
 
-## Instalación
+## Installation
 
-"[Descarga](https://github.com/ZagonAb/PMDB-Theme/archive/refs/heads/main.zip) y extrae el tema en tu [directorio de temas](http://pegasus-frontend.org/docs/user-guide/installing-themes). **Recuerda** renombrar la carpeta extraída como **PMDB-Theme**, ya que el [PMDB-Media-Player](https://github.com/ZagonAb/PMDB-Media-Player) necesita encontrar esa carpeta dentro de **themes** para guardar la posición de reproducción en `database.json` y completar su integración con la interfaz. Después podrás activarlo desde el menú de configuración de Pegasus."
+"[Download](https://github.com/ZagonAb/PMDB-Theme/archive/refs/heads/main.zip) and extract the theme into your [themes directory](http://pegasus-frontend.org/docs/user-guide/installing-themes). **Remember** to rename the extracted folder to **PMDB-Theme**, since [PMDB-Media-Player](https://github.com/ZagonAb/PMDB-Media-Player) needs to locate this folder inside **themes** in order to store playback position in `database.json` and complete its integration with the interface. After that, you can enable it from the Pegasus settings menu."
 
 ---
 
-# Licencia
-<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Licencia Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"></a>
+# License
 
-----
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"></a>
+
+---
 
 ### 💖 DONATE
 I'm a programming enthusiast and passionate about free software, with a special love for classic games and the retro community. All my themes and projects are open-source and available for anyone to use. If you'd like to show your support or help me continue creating and improving these projects, you can make a voluntary donation. Every contribution, no matter how small, allows me to continue improving and maintaining these projects. 👾
